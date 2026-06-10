@@ -266,7 +266,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDze2-_UdQLrNrleUSO7SmM4IcKBQb2h6A",
@@ -380,7 +380,11 @@ window.addGasto=async()=>{
   document.getElementById('g-desc').value='';document.getElementById('g-monto').value='';
 };
 
-window.confirmarPedido=async id=>await updateDoc(doc(db,'pedidos',id),{estado:'confirmado'});
+window.eliminarPedido=async id=>{
+  const p=S.pedidos.find(x=>x.id===id);
+  if(!p||!confirm('¿Eliminar el pedido de '+p.nombre+'? Esta acción no se puede deshacer.'))return;
+  await deleteDoc(doc(db,'pedidos',id));
+};
 
 window.setPrecioPedido=async id=>{
   const p=S.pedidos.find(x=>x.id===id);
@@ -441,7 +445,7 @@ function renderPedidos(){
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         ${p.estado==='nuevo'?`<button class="btn btn-g btn-sm" onclick="confirmarPedido('${p.id}')"><i class="ti ti-check" style="font-size:12px"></i> Confirmar</button>`:''}
         ${p.estado==='confirmado'?`<button class="btn btn-g btn-sm" onclick="setPrecioPedido('${p.id}')"><i class="ti ti-currency-dollar" style="font-size:12px"></i> Precio</button><button class="btn btn-olive btn-sm" onclick="marcarEntregado('${p.id}')"><i class="ti ti-truck" style="font-size:12px"></i> Entregado</button>`:''}
-        ${p.estado==='entregado'?`<span class="badge bg"><i class="ti ti-check" style="font-size:11px"></i> Stock descontado</span>`:''}
+        ${p.estado==='entregado'?`<span class="badge bg"><i class="ti ti-check" style="font-size:11px"></i> Stock descontado</span><button class="btn btn-ghost btn-sm" style="color:#b84040;border-color:#f0a0a0;margin-left:4px" onclick="eliminarPedido('${p.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Eliminar</button>`:''}
       </div>
     </div>`).join('');
 }
