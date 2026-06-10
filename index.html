@@ -435,6 +435,7 @@ function renderPedidos(){
         <div><i class="ti ti-package" style="font-size:12px;color:var(--muted)"></i> <strong>${p.units} botellas</strong>${p.monto?' · '+fmt(p.monto):''}</div>
         <div><i class="ti ti-map-pin" style="font-size:12px;color:var(--muted)"></i> ${p.dir}${p.cp?' · CP '+p.cp:''}</div>
         <div><i class="ti ti-calendar" style="font-size:12px;color:var(--muted)"></i> ${fmtF(p.fecha)} · ${p.horario||''}</div>
+        ${p.envio?`<div><i class="ti ti-truck" style="font-size:12px;color:var(--olive)"></i> <strong style="color:var(--olive2)">${{uber:'Uber Envíos',correo:'Correo Argentino',retiro:'Retiro en depósito',coordinar:'Coordinar con vendedor'}[p.envio]||p.envio}</strong></div>`:''}
         ${p.mensaje?`<div><i class="ti ti-message" style="font-size:12px;color:var(--muted)"></i> ${p.mensaje}</div>`:''}
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
