@@ -4,85 +4,100 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pistacchielo — Hacer un pedido</title>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f0e8;color:#1a1a1a}
-.app{max-width:480px;margin:0 auto;background:#f5f0e8;min-height:100vh}
-#loading{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px;background:#f5f0e8}
-.spinner{width:32px;height:32px;border:3px solid #ddd;border-top-color:#8ab840;border-radius:50%;animation:spin .8s linear infinite}
+:root{
+  --bg:#f2ead8;
+  --bg2:#ede4cc;
+  --white:#fffdf7;
+  --black:#1c1a14;
+  --olive:#7a8c3a;
+  --olive2:#5c6a28;
+  --gold:#c8a96e;
+  --gold2:#a8893e;
+  --border:#d8ccb0;
+  --text:#2c2a1e;
+  --muted:#7a7060;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:480px;margin:0 auto;background:var(--bg);min-height:100vh}
+#loading{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px;background:var(--bg)}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--olive);border-radius:50%;animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.topbar{background:#1a1a1a;padding:12px 16px 14px;display:flex;align-items:center;gap:10px}
-.lc{width:34px;height:34px;background:#8ab840;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.lc i{font-size:17px;color:#1a1a1a}
-.brand{font-family:'Dancing Script',cursive;font-size:26px;color:#f5f0e8;flex:1;line-height:1.2}
-.brand-sub{font-size:11px;color:#8ab840}
-.tabs{display:flex;background:#fff;border-bottom:0.5px solid #ddd}
-.tab{flex:1;padding:11px 8px;font-size:12px;font-weight:500;text-align:center;border:none;background:transparent;cursor:pointer;color:#888;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px}
-.tab.on{color:#1a1a1a;border-bottom-color:#8ab840;font-weight:700}
-.body{padding:14px;padding-bottom:30px}
+.topbar{background:var(--black);padding:13px 16px 15px;display:flex;align-items:center;gap:10px}
+.lc{width:36px;height:36px;background:var(--olive);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lc i{font-size:18px;color:var(--white)}
+.brand{font-family:'Dancing Script',cursive;font-size:26px;color:var(--bg);flex:1;line-height:1.1}
+.brand-sub{font-size:10px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase}
+.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:12px 6px;font-size:12px;font-weight:500;text-align:center;border:none;background:transparent;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px;letter-spacing:.3px}
+.tab.on{color:var(--olive2);border-bottom-color:var(--olive);font-weight:600}
+.body{padding:14px;padding-bottom:40px}
 .section{display:none}.section.active{display:block}
-.card{background:#fff;border-radius:14px;border:0.5px solid #e8e0d0;padding:14px;margin-bottom:10px}
-.card-hd{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:10px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.5px}
-input,select,textarea{width:100%;padding:10px 12px;border:0.5px solid #ccc;border-radius:10px;font-size:14px;background:#fff;color:#1a1a1a;font-family:inherit;margin-bottom:8px}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#8ab840;box-shadow:0 0 0 2px rgba(138,184,64,0.15)}
-label{font-size:12px;color:#666;display:block;margin-bottom:3px}
-.req{color:#c0392b;margin-left:2px}
-.btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.3px}
-.btn-g{background:#1a1a1a;color:#f5f0e8}.btn-g:active{background:#333}
+.card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px}
+.card-hd{font-size:11px;font-weight:600;color:var(--gold2);margin-bottom:12px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:1.2px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;margin-bottom:8px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--olive);box-shadow:0 0 0 2px rgba(122,140,58,0.12);background:var(--white)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-weight:500}
+.req{color:#b84040;margin-left:2px}
+.btn{width:100%;padding:13px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.3px;transition:opacity .15s}
+.btn:active{opacity:.85}
+.btn-g{background:var(--black);color:var(--bg)}
+.btn-olive{background:var(--olive);color:var(--white)}
 .btn-ca{background:#004B9C;color:#fff}
-.btn-cb{background:#7c3aed;color:#fff}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.hero{background:#1a1a1a;border-radius:16px;padding:22px 20px;margin-bottom:10px;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:#8ab840;border-radius:50%;opacity:.15}
-.hero-brand{font-family:'Dancing Script',cursive;font-size:42px;color:#f5f0e8;line-height:1}
-.hero-sub{font-size:13px;color:#8ab840;margin-top:6px}
-.hero-desc{font-size:12px;color:#aaa;margin-top:4px}
-.hero-tag{display:inline-block;background:#8ab840;color:#1a1a1a;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-top:12px;letter-spacing:.5px;text-transform:uppercase}
-.info-box{background:#fff;border:0.5px solid #e8e0d0;border-radius:10px;padding:10px 12px;display:flex;gap:8px;margin-bottom:10px}
-.info-box i{color:#8ab840;font-size:16px;flex-shrink:0;margin-top:1px}
-.it{font-size:13px;font-weight:600;color:#1a1a1a}
-.is{font-size:12px;color:#666;margin-top:1px}
-.cant-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.cant-btn{width:46px;height:46px;border-radius:10px;border:2px solid #1a1a1a;background:transparent;font-size:24px;cursor:pointer;color:#1a1a1a;font-weight:700;display:flex;align-items:center;justify-content:center}
-.cant-btn:active{background:#f5f0e8}
-.cant-n{flex:1;text-align:center;font-size:40px;font-weight:700;color:#1a1a1a}
-.cant-lbl{font-size:12px;color:#666;text-align:center;margin-bottom:10px}
-.precio-box{border-radius:10px;padding:12px 14px;margin-top:4px;margin-bottom:4px}
-.precio-box.n1{background:#f5f0e8;border:0.5px solid #e0d8c8}
-.precio-box.n2{background:#eef5e0;border:0.5px solid #c0d890}
-.precio-box.n3{background:#1a1a1a;border:none}
-.precio-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
-.t1{background:#e0d8c8;color:#555}
-.t2{background:#c0d890;color:#2d5a00}
-.t3{background:#8ab840;color:#1a1a1a}
-.envio-box{border-radius:10px;padding:12px;margin-bottom:8px;border:0.5px solid #e8e0d0;background:#fff}
-.envio-logo{font-size:13px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.envio-desc{font-size:12px;color:#666;margin-bottom:8px;line-height:1.4}
-.envio-hint{font-size:11px;color:#888;text-align:center;margin-top:4px}
-.row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:0.5px solid #eee}
+.btn-cb{background:#6d28d9;color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.hero{background:var(--black);border-radius:14px;padding:24px 20px;margin-bottom:12px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'PISTACHO';position:absolute;bottom:-10px;right:-8px;font-size:52px;font-weight:900;color:rgba(255,255,255,0.04);letter-spacing:-1px;pointer-events:none;font-family:'Playfair Display',serif}
+.hero-eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-weight:500}
+.hero-brand{font-family:'Dancing Script',cursive;font-size:44px;color:var(--bg);line-height:1}
+.hero-sub{font-size:12px;color:#888;margin-top:8px;letter-spacing:.5px}
+.hero-tag{display:inline-block;background:var(--olive);color:var(--white);font-size:10px;font-weight:600;padding:4px 14px;border-radius:20px;margin-top:12px;letter-spacing:1px;text-transform:uppercase}
+.info-box{background:var(--white);border:1px solid var(--border);border-left:3px solid var(--olive);border-radius:0 10px 10px 0;padding:10px 12px;display:flex;gap:10px;margin-bottom:12px}
+.info-box i{color:var(--olive);font-size:16px;flex-shrink:0;margin-top:1px}
+.it{font-size:13px;font-weight:600;color:var(--text)}
+.is{font-size:12px;color:var(--muted);margin-top:2px}
+.cant-row{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.cant-btn{width:48px;height:48px;border-radius:10px;border:1.5px solid var(--olive);background:transparent;font-size:24px;cursor:pointer;color:var(--olive2);font-weight:600;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.cant-btn:active{background:var(--bg2)}
+.cant-n{flex:1;text-align:center;font-size:44px;font-weight:700;color:var(--black);font-family:'Playfair Display',serif}
+.cant-lbl{font-size:11px;color:var(--muted);text-align:center;margin-bottom:12px;letter-spacing:.5px}
+.precio-box{border-radius:10px;padding:12px 14px;margin-top:4px;margin-bottom:4px;border:1px solid var(--border)}
+.precio-box.n1{background:var(--bg2)}
+.precio-box.n2{background:#eef3dc;border-color:#c0cf90}
+.precio-box.n3{background:var(--black);border-color:var(--black)}
+.precio-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 10px;border-radius:20px;margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase}
+.t1{background:var(--border);color:var(--muted)}
+.t2{background:#c8d890;color:var(--olive2)}
+.t3{background:var(--gold);color:var(--black)}
+.envio-box{border-radius:10px;padding:13px;margin-bottom:10px;border:1px solid var(--border);background:var(--white)}
+.envio-logo{font-size:13px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.envio-desc{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+.envio-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:5px}
+.row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bg2)}
 .row:last-child{border-bottom:none}
-.ri{flex:1;min-width:0}.rn{font-size:13px;font-weight:500}.rs{font-size:11px;color:#888;margin-top:1px}
-.rv{font-size:13px;font-weight:600;color:#1a1a1a;white-space:nowrap}
-.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
-.ba{background:#faeeda;color:#633806}.bb{background:#e6f1fb;color:#0c447c}.bg{background:#eef5e0;color:#2d5a00}
-.confirm-box{background:#1a1a1a;border-radius:16px;padding:24px;text-align:center;margin-bottom:10px}
-.confirm-check{width:52px;height:52px;background:#8ab840;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
-.confirm-brand{font-family:'Dancing Script',cursive;font-size:30px;color:#f5f0e8;margin-bottom:4px}
-.confirm-sub{font-size:13px;color:#8ab840}
-.err{color:#c0392b;font-size:12px;margin:-4px 0 6px}
+.ri{flex:1;min-width:0}.rn{font-size:13px;font-weight:500}.rs{font-size:11px;color:var(--muted);margin-top:1px}
+.rv{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.ba{background:#faeeda;color:#7a4010}.bb{background:#dceeff;color:#1a4a7a}.bg{background:#eef3dc;color:var(--olive2)}
+.confirm-box{background:var(--black);border-radius:14px;padding:28px 20px;text-align:center;margin-bottom:12px}
+.confirm-check{width:54px;height:54px;background:var(--olive);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.confirm-brand{font-family:'Dancing Script',cursive;font-size:32px;color:var(--bg);margin-bottom:4px}
+.confirm-sub{font-size:13px;color:#888}
+.err{color:#b84040;font-size:12px;margin:-4px 0 6px;display:flex;align-items:center;gap:4px}
+.divider{height:1px;background:var(--border);margin:4px 0 12px}
 .price-table{width:100%;border-collapse:collapse;font-size:13px}
-.price-table tr{border-bottom:0.5px solid #eee}
+.price-table tr{border-bottom:1px solid var(--bg2)}
 .price-table tr:last-child{border-bottom:none}
-.price-table td{padding:9px 4px;vertical-align:middle}
+.price-table td{padding:10px 4px;vertical-align:middle}
 </style>
 </head>
 <body>
-
 <div id="loading">
   <div class="spinner"></div>
-  <div style="font-family:'Dancing Script',cursive;font-size:28px;color:#1a1a1a">Pistacchielo</div>
+  <div style="font-family:'Dancing Script',cursive;font-size:30px;color:var(--black)">Pistacchielo</div>
 </div>
 
 <div id="main-app" class="app" style="display:none">
@@ -97,49 +112,48 @@ label{font-size:12px;color:#666;display:block;margin-bottom:3px}
   </div>
 
   <div class="body">
-
     <div class="section active" id="s-pedido">
       <div class="hero">
+        <div class="hero-eyebrow">Licor de Crema de Pistacho</div>
         <div class="hero-brand">Pistacchielo</div>
-        <div class="hero-sub">Licor de Crema de Pistacho</div>
-        <div class="hero-desc">Gennarino Francescoli · España</div>
-        <div class="hero-tag">Pedido online</div>
+        <div class="hero-sub">Gennarino Francescoli · España · 700ml · 17% vol.</div>
+        <div class="hero-tag">Hacé tu pedido</div>
       </div>
 
       <div class="info-box">
         <i class="ti ti-info-circle"></i>
-        <div><div class="it">Completá tu pedido</div><div class="is">Te contactamos para confirmar entrega y pago</div></div>
+        <div><div class="it">¿Cómo funciona?</div><div class="is">Completá el formulario — te contactamos para confirmar entrega y pago</div></div>
       </div>
 
       <div class="card">
         <div class="card-hd"><i class="ti ti-user"></i> Tus datos</div>
         <label>Nombre / empresa <span class="req">*</span></label>
         <input id="c-nombre" placeholder="Ej: Bar La Esquina" oninput="limpiarErr('e-nombre')">
-        <div id="e-nombre" class="err" style="display:none">Ingresá tu nombre</div>
+        <div id="e-nombre" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Ingresá tu nombre</div>
         <label>Teléfono / WhatsApp <span class="req">*</span></label>
         <input id="c-tel" type="tel" placeholder="+54 11 ..." oninput="limpiarErr('e-tel')">
-        <div id="e-tel" class="err" style="display:none">Ingresá tu teléfono</div>
+        <div id="e-tel" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Ingresá tu teléfono</div>
         <label>Email <span class="req">*</span></label>
         <input id="c-email" type="email" placeholder="tu@email.com" oninput="limpiarErr('e-email')">
-        <div id="e-email" class="err" style="display:none">Ingresá tu email</div>
+        <div id="e-email" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Ingresá tu email</div>
       </div>
 
       <div class="card">
         <div class="card-hd"><i class="ti ti-package"></i> Cantidad y precio</div>
         <div class="cant-row">
-          <button class="cant-btn" onclick="adj(-1)" aria-label="Restar">−</button>
+          <button class="cant-btn" onclick="adj(-1)">−</button>
           <div class="cant-n" id="cant-n">1</div>
-          <button class="cant-btn" onclick="adj(1)" aria-label="Sumar">+</button>
+          <button class="cant-btn" onclick="adj(1)">+</button>
         </div>
         <div class="cant-lbl">botellas de Pistacchielo 700ml · 17% vol.</div>
         <div id="precio-display"></div>
       </div>
 
       <div class="card">
-        <div class="card-hd"><i class="ti ti-map-pin"></i> Entrega</div>
+        <div class="card-hd"><i class="ti ti-map-pin"></i> Datos de entrega</div>
         <label>Dirección completa <span class="req">*</span></label>
         <input id="c-dir" placeholder="Calle, número, piso, localidad" oninput="onDirChange()">
-        <div id="e-dir" class="err" style="display:none">Ingresá la dirección de entrega</div>
+        <div id="e-dir" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Ingresá la dirección</div>
         <label>Código postal</label>
         <input id="c-cp" placeholder="Ej: 1406" maxlength="8" oninput="onDirChange()">
         <label>Fecha preferida</label>
@@ -152,65 +166,73 @@ label{font-size:12px;color:#666;display:block;margin-bottom:3px}
           <option>Tarde (16:00–20:00)</option>
           <option>Cualquier horario</option>
         </select>
-        <div id="e-horario" class="err" style="display:none">Elegí una franja horaria</div>
-        <label>Mensaje adicional</label>
-        <textarea id="c-msg" rows="2" placeholder="Indicaciones, acceso, timbre, etc."></textarea>
+        <div id="e-horario" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Elegí una franja horaria</div>
+        <label>Indicaciones adicionales</label>
+        <textarea id="c-msg" rows="2" placeholder="Acceso, timbre, referencia..."></textarea>
       </div>
 
       <div class="card">
         <div class="card-hd"><i class="ti ti-truck"></i> Consultar envío</div>
-        <div style="font-size:12px;color:#666;margin-bottom:10px;line-height:1.5">El costo de envío corre por cuenta del comprador.</div>
-
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">El costo de envío corre por cuenta del comprador. Consultá el precio antes de confirmar.</div>
         <div class="envio-box">
-          <div class="envio-logo" style="color:#004B9C"><i class="ti ti-mail" style="font-size:15px"></i> Correo Argentino</div>
-          <div class="envio-desc">Calculá el costo oficial según tu código postal.</div>
+          <div class="envio-logo" style="color:#004B9C"><i class="ti ti-mail" style="font-size:16px"></i> Correo Argentino</div>
+          <div class="envio-desc">Calculá el costo oficial según tu código postal. Retiro en sucursal o a domicilio.</div>
           <button class="btn btn-ca" id="btn-ca" onclick="abrirCorreo()" disabled><i class="ti ti-external-link" style="font-size:14px"></i> Calcular en Correo Argentino</button>
-          <div class="envio-hint" id="ca-hint">Ingresá dirección y CP para habilitar</div>
+          <div class="envio-hint" id="ca-hint">Ingresá tu dirección y CP para habilitar</div>
         </div>
-
         <div class="envio-box">
-          <div class="envio-logo" style="color:#7c3aed"><i class="ti ti-car" style="font-size:15px"></i> Cabify Envíos</div>
-          <div class="envio-desc">Envío express desde <strong>Av. Chivilcoy 4475, CABA</strong>. Cotizá en tiempo real.</div>
+          <div class="envio-logo" style="color:#6d28d9"><i class="ti ti-car" style="font-size:16px"></i> Cabify Envíos</div>
+          <div class="envio-desc">Envío express desde <strong style="color:var(--text)">Av. Chivilcoy 4475, CABA</strong>. Cotizá en tiempo real.</div>
           <button class="btn btn-cb" id="btn-cb" onclick="abrirCabify()" disabled><i class="ti ti-external-link" style="font-size:14px"></i> Cotizar en Cabify</button>
           <div class="envio-hint" id="cb-hint">Ingresá tu dirección para habilitar</div>
         </div>
       </div>
 
-      <button class="btn btn-g" id="btn-enviar" onclick="enviarPedido()"><i class="ti ti-send" style="font-size:15px"></i> Enviar pedido</button>
+      <button class="btn btn-g" id="btn-enviar" onclick="enviarPedido()"><i class="ti ti-send" style="font-size:15px"></i> Confirmar pedido</button>
     </div>
 
     <div class="section" id="s-precios">
-      <div class="hero" style="padding:18px">
-        <div class="hero-brand" style="font-size:34px">Pistacchielo</div>
-        <div class="hero-sub">Lista de precios</div>
+      <div class="hero" style="margin-bottom:12px">
+        <div class="hero-eyebrow">Gennarino Francescoli · España</div>
+        <div class="hero-brand">Pistacchielo</div>
+        <div class="hero-sub">Lista de precios vigente</div>
       </div>
       <div class="card">
         <div class="card-hd"><i class="ti ti-tag"></i> Precios por cantidad</div>
         <table class="price-table">
-          <tr><td style="color:#888">Cantidad</td><td style="color:#888">Precio c/u</td><td style="color:#888">Ahorro</td></tr>
-          <tr><td>1–5 botellas</td><td style="font-weight:700">$45.000</td><td style="color:#888">—</td></tr>
-          <tr style="background:#eef5e0"><td>Caja × 6 (6–23 bot.)</td><td style="font-weight:700;color:#2d5a00">$34.500</td><td><span style="background:#c0d890;color:#2d5a00;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700">−23%</span></td></tr>
-          <tr style="background:#e8f0d0"><td>4 cajas o más (24+)</td><td style="font-weight:700;color:#1a1a1a">$29.500</td><td><span style="background:#8ab840;color:#1a1a1a;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700">−34%</span></td></tr>
+          <tr style="color:var(--muted)"><td>Cantidad</td><td>Precio c/u</td><td>Descuento</td></tr>
+          <tr><td style="font-weight:500">1–5 botellas</td><td style="font-weight:700">$45.000</td><td style="color:var(--muted)">—</td></tr>
+          <tr style="background:#eef3dc"><td style="font-weight:500">Caja × 6 <span style="font-size:11px;color:var(--muted)">(6–23 bot.)</span></td><td style="font-weight:700;color:var(--olive2)">$34.500</td><td><span style="background:#c8d890;color:var(--olive2);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">−23%</span></td></tr>
+          <tr style="background:#f5f0e0"><td style="font-weight:500">4 cajas o más <span style="font-size:11px;color:var(--muted)">(24+ bot.)</span></td><td style="font-weight:700;color:var(--gold2)">$29.500</td><td><span style="background:var(--gold);color:var(--black);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">−34%</span></td></tr>
         </table>
       </div>
       <div class="info-box">
         <i class="ti ti-info-circle"></i>
-        <div><div class="it">Pistacchielo 700ml · 17% vol.</div><div class="is">Licor de Crema de Pistacho · Gennarino Francescoli · Importado de España</div></div>
+        <div>
+          <div class="it">Ficha técnica</div>
+          <div class="is">700ml · 17% Alc. · Crema de pistacho · 6 botellas por caja · Origen italiano · Importado de España</div>
+        </div>
       </div>
-      <button class="btn btn-g" onclick="goTab('pedido')"><i class="ti ti-shopping-cart" style="font-size:15px"></i> Hacer un pedido</button>
+      <div class="info-box" style="border-left-color:var(--gold)">
+        <i class="ti ti-shield-check" style="color:var(--gold2)"></i>
+        <div>
+          <div class="it">Marca registrada</div>
+          <div class="is">Registro sanitario aprobado · Importación directa · Exclusividad por zona disponible</div>
+        </div>
+      </div>
+      <button class="btn btn-olive" onclick="goTab('pedido')"><i class="ti ti-shopping-cart" style="font-size:15px"></i> Hacer un pedido</button>
     </div>
 
     <div class="section" id="s-mis">
       <div class="info-box">
-        <i class="ti ti-info-circle"></i>
-        <div><div class="it">Tus pedidos</div><div class="is">Una vez confirmados te avisamos por WhatsApp o email</div></div>
+        <i class="ti ti-clock"></i>
+        <div><div class="it">Estado de tus pedidos</div><div class="is">Actualizamos el estado en tiempo real. Te avisamos por WhatsApp o email.</div></div>
       </div>
       <div class="card">
         <div class="card-hd"><i class="ti ti-list"></i> Historial</div>
-        <div id="mis-list"><div style="text-align:center;padding:20px;font-size:13px;color:#888">Sin pedidos enviados aún</div></div>
+        <div id="mis-list"><div style="text-align:center;padding:24px;font-size:13px;color:var(--muted)">Sin pedidos enviados aún</div></div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -236,7 +258,7 @@ document.getElementById('c-fecha').value = today();
 
 const PRECIOS = [
   { min:24, pcu:29500, label:'4 cajas o más', desc:'−34%', nivel:3 },
-  { min:6,  pcu:34500, label:'Por caja (×6)',  desc:'−23%', nivel:2 },
+  { min:6,  pcu:34500, label:'Por caja (×6)', desc:'−23%', nivel:2 },
   { min:1,  pcu:45000, label:'Precio unitario', desc:null,  nivel:1 },
 ];
 const ORIGEN = 'Av. Chivilcoy 4475, CABA, Argentina';
@@ -260,13 +282,13 @@ function renderPrecio(){
   const total = cant * p.pcu;
   const nc = ['','n1','n2','n3'][p.nivel];
   const tc = ['','t1','t2','t3'][p.nivel];
-  const vc = p.nivel===3?'color:#f5f0e8':'color:#1a1a1a';
-  const sc = p.nivel===3?'color:#8ab840':'color:#666';
+  const vc = p.nivel===3 ? 'color:#f2ead8' : p.nivel===2 ? 'color:#5c6a28' : 'color:#1c1a14';
+  const sc = p.nivel===3 ? 'color:#888' : 'color:#7a7060';
   document.getElementById('precio-display').innerHTML = `
     <div class="precio-box ${nc}">
-      <div><span class="precio-tag ${tc}">${p.label}${p.desc?' · '+p.desc:''}</span></div>
-      <div style="font-size:24px;font-weight:700;${vc}">${fmtP(p.pcu)} <span style="font-size:14px;font-weight:400;${sc}">por botella</span></div>
-      <div style="font-size:14px;font-weight:600;${sc};margin-top:2px">Total: <strong style="${vc}">${fmtP(total)}</strong></div>
+      <span class="precio-tag ${tc}">${p.label}${p.desc?' · '+p.desc:''}</span>
+      <div style="font-size:26px;font-weight:700;${vc};font-family:'Playfair Display',serif">${fmtP(p.pcu)} <span style="font-size:14px;font-weight:400;${sc}">/ botella</span></div>
+      <div style="font-size:14px;font-weight:600;${sc};margin-top:3px">Total estimado: <strong style="${vc}">${fmtP(total)}</strong></div>
     </div>`;
 }
 
@@ -284,34 +306,27 @@ window.onDirChange = () => {
   const dir = document.getElementById('c-dir').value.trim();
   const cp = document.getElementById('c-cp').value.trim();
   limpiarErr('e-dir');
-  const btnCa=document.getElementById('btn-ca');
-  const btnCb=document.getElementById('btn-cb');
-  const caH=document.getElementById('ca-hint');
-  const cbH=document.getElementById('cb-hint');
-  if(dir&&cp){ btnCa.disabled=false; caH.textContent='Listo — abre en nueva pestaña'; caH.style.color='#2d5a00'; }
-  else if(dir){ btnCa.disabled=true; caH.textContent='Ingresá también el código postal'; caH.style.color='#888'; }
-  else{ btnCa.disabled=true; caH.textContent='Ingresá dirección y CP para habilitar'; caH.style.color='#888'; }
-  if(dir){ btnCb.disabled=false; cbH.textContent='Listo — abre en nueva pestaña'; cbH.style.color='#2d5a00'; }
-  else{ btnCb.disabled=true; cbH.textContent='Ingresá tu dirección para habilitar'; cbH.style.color='#888'; }
+  const btnCa=document.getElementById('btn-ca'), btnCb=document.getElementById('btn-cb');
+  const caH=document.getElementById('ca-hint'), cbH=document.getElementById('cb-hint');
+  if(dir&&cp){ btnCa.disabled=false; caH.textContent='Listo — abre en nueva pestaña'; caH.style.color='#5c6a28'; }
+  else if(dir){ btnCa.disabled=true; caH.textContent='Ingresá también el código postal'; caH.style.color='#7a7060'; }
+  else{ btnCa.disabled=true; caH.textContent='Ingresá tu dirección y CP para habilitar'; caH.style.color='#7a7060'; }
+  if(dir){ btnCb.disabled=false; cbH.textContent='Listo — abre en nueva pestaña'; cbH.style.color='#5c6a28'; }
+  else{ btnCb.disabled=true; cbH.textContent='Ingresá tu dirección para habilitar'; cbH.style.color='#7a7060'; }
 };
 
-window.abrirCorreo = () => {
-  window.open('https://www.correoargentino.com.ar/MiCorreo/public/tarifas','_blank');
-};
-
+window.abrirCorreo = () => window.open('https://www.correoargentino.com.ar/MiCorreo/public/tarifas','_blank');
 window.abrirCabify = () => {
   const dir = document.getElementById('c-dir').value.trim();
-  const dest = encodeURIComponent(dir+', Argentina');
-  const orig = encodeURIComponent(ORIGEN);
-  window.open(`https://cabify.com/ar/envios?origin=${orig}&destination=${dest}`,'_blank');
+  window.open(`https://cabify.com/ar/envios?origin=${encodeURIComponent(ORIGEN)}&destination=${encodeURIComponent(dir+', Argentina')}`,'_blank');
 };
 
 function validar(){
   let ok=true;
   [{id:'c-nombre',err:'e-nombre',msg:'Ingresá tu nombre'},{id:'c-tel',err:'e-tel',msg:'Ingresá tu teléfono'},{id:'c-email',err:'e-email',msg:'Ingresá tu email'},{id:'c-dir',err:'e-dir',msg:'Ingresá la dirección'}].forEach(c=>{
-    if(!document.getElementById(c.id).value.trim()){const el=document.getElementById(c.err);el.textContent=c.msg;el.style.display='block';ok=false;}
+    if(!document.getElementById(c.id).value.trim()){const el=document.getElementById(c.err);el.innerHTML=`<i class="ti ti-alert-circle" style="font-size:13px"></i> ${c.msg}`;el.style.display='flex';ok=false;}
   });
-  if(!document.getElementById('c-horario').value){document.getElementById('e-horario').style.display='block';ok=false;}
+  if(!document.getElementById('c-horario').value){document.getElementById('e-horario').style.display='flex';ok=false;}
   return ok;
 }
 
@@ -328,49 +343,45 @@ window.enviarPedido = async () => {
   const p=getPrecio(cant);
   const total=cant*p.pcu;
   const btn=document.getElementById('btn-enviar');
-  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader" style="font-size:15px"></i> Enviando...';
+  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2" style="font-size:15px"></i> Enviando...';
   try {
-    const ref = await addDoc(collection(db,'pedidos'),{
-      nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,fecha,horario,mensaje,
-      estado:'nuevo',hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
-      creadoEn:serverTimestamp()
-    });
+    const ref = await addDoc(collection(db,'pedidos'),{nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,fecha,horario,mensaje,estado:'nuevo',hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),creadoEn:serverTimestamp()});
     misPedidosIds=[ref.id,...misPedidosIds];
     sessionStorage.setItem('pist_ids',JSON.stringify(misPedidosIds));
     document.getElementById('s-pedido').innerHTML=`
       <div class="confirm-box">
-        <div class="confirm-check"><i class="ti ti-check" style="font-size:24px;color:#1a1a1a"></i></div>
+        <div class="confirm-check"><i class="ti ti-check" style="font-size:26px;color:#fff"></i></div>
         <div class="confirm-brand">Pistacchielo</div>
-        <div class="confirm-sub">${nombre} · ${cant} botella${cant>1?'s':''}</div>
-        <div style="font-size:15px;color:#8ab840;margin-top:4px;font-weight:700">${fmtP(total)}</div>
-        <div style="font-size:12px;color:#aaa;margin-top:2px">${fmtF(fecha)} · ${horario}</div>
+        <div class="confirm-sub" style="margin-bottom:6px">${nombre}</div>
+        <div style="font-size:20px;color:#c8a96e;font-weight:700;font-family:'Playfair Display',serif">${fmtP(total)}</div>
+        <div style="font-size:12px;color:#666;margin-top:4px">${cant} botella${cant>1?'s':''} · ${fmtF(fecha)} · ${horario}</div>
       </div>
       <div class="info-box">
-        <i class="ti ti-check" style="color:#8ab840;font-size:16px;flex-shrink:0;margin-top:1px"></i>
+        <i class="ti ti-check" style="color:#7a8c3a;font-size:16px;flex-shrink:0;margin-top:1px"></i>
         <div><div class="it">¡Pedido recibido!</div><div class="is">Te contactamos pronto al ${tel} o ${email}</div></div>
       </div>
       <div class="card">
-        <div class="card-hd"><i class="ti ti-receipt"></i> Resumen</div>
+        <div class="card-hd"><i class="ti ti-receipt"></i> Resumen del pedido</div>
         <div class="row"><div class="ri"><div class="rn">Botellas</div></div><div class="rv">${cant}</div></div>
-        <div class="row"><div class="ri"><div class="rn">Precio por botella</div></div><div class="rv">${fmtP(p.pcu)}</div></div>
-        <div class="row"><div class="ri"><div class="rn" style="font-weight:700">Total estimado</div></div><div class="rv" style="font-size:16px">${fmtP(total)}</div></div>
+        <div class="row"><div class="ri"><div class="rn">Precio unitario</div></div><div class="rv">${fmtP(p.pcu)}</div></div>
+        <div class="row"><div class="ri"><div class="rn" style="font-weight:700">Total estimado</div></div><div class="rv" style="font-size:16px;color:#7a8c3a">${fmtP(total)}</div></div>
         <div class="row"><div class="ri"><div class="rn">Dirección</div><div class="rs">${dir}${cp?' · CP '+cp:''}</div></div></div>
         <div class="row"><div class="ri"><div class="rn">Entrega</div></div><div class="rv" style="font-size:12px">${fmtF(fecha)} · ${horario}</div></div>
       </div>
       <button class="btn btn-g" onclick="goTab('mis')"><i class="ti ti-list" style="font-size:15px"></i> Ver mis pedidos</button>`;
   } catch(e) {
-    btn.disabled=false; btn.innerHTML='<i class="ti ti-send" style="font-size:15px"></i> Enviar pedido';
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-send" style="font-size:15px"></i> Confirmar pedido';
     alert('Error al enviar. Intentá de nuevo.');
   }
 };
 
 function renderMis(){
   const el=document.getElementById('mis-list');
-  if(!misPedidosIds.length){el.innerHTML='<div style="text-align:center;padding:20px;font-size:13px;color:#888">Sin pedidos enviados aún</div>';return;}
-  const label={nuevo:'Pendiente de confirmar',confirmado:'Confirmado',entregado:'Entregado'};
+  if(!misPedidosIds.length){el.innerHTML='<div style="text-align:center;padding:24px;font-size:13px;color:var(--muted)">Sin pedidos enviados aún</div>';return;}
+  const label={nuevo:'Pendiente',confirmado:'Confirmado',entregado:'Entregado'};
   const badge={nuevo:'ba',confirmado:'bb',entregado:'bg'};
   const mios=pedidosData.filter(p=>misPedidosIds.includes(p.id));
-  if(!mios.length){el.innerHTML='<div style="text-align:center;padding:20px;font-size:13px;color:#888">Cargando...</div>';return;}
+  if(!mios.length){el.innerHTML='<div style="text-align:center;padding:24px;font-size:13px;color:var(--muted)">Cargando...</div>';return;}
   el.innerHTML=mios.map(p=>`
     <div class="row">
       <div class="ri">
@@ -387,7 +398,6 @@ if(misPedidosIds.length){
     renderMis();
   });
 }
-
 renderPrecio();
 </script>
 </body>
