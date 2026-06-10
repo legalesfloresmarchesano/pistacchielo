@@ -47,7 +47,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
 .btn-g{background:var(--black);color:var(--bg)}
 .btn-olive{background:var(--olive);color:var(--white)}
 .btn-ca{background:#004B9C;color:#fff}
-.btn-cb{background:#6d28d9;color:#fff}
+.btn-ub{background:#1a1a1a;color:#fff}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .hero{background:var(--black);border-radius:14px;padding:24px 20px;margin-bottom:12px;text-align:center;position:relative;overflow:hidden}
 .hero::after{content:'PISTACHO';position:absolute;bottom:-10px;right:-8px;font-size:52px;font-weight:900;color:rgba(255,255,255,0.04);letter-spacing:-1px;pointer-events:none;font-family:'Playfair Display',serif}
@@ -176,15 +176,22 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">El costo de envío corre por cuenta del comprador. Consultá el precio antes de confirmar.</div>
         <div class="envio-box">
           <div class="envio-logo" style="color:#004B9C"><i class="ti ti-mail" style="font-size:16px"></i> Correo Argentino</div>
-          <div class="envio-desc">Calculá el costo oficial según tu código postal. Retiro en sucursal o a domicilio.</div>
-          <button class="btn btn-ca" id="btn-ca" onclick="abrirCorreo()" disabled><i class="ti ti-external-link" style="font-size:14px"></i> Calcular en Correo Argentino</button>
-          <div class="envio-hint" id="ca-hint">Ingresá tu dirección y CP para habilitar</div>
+          <div class="envio-desc">Ideal para envíos al interior. Calculá el costo según tu código postal. Usá esta dirección de origen:</div>
+          <div style="background:var(--bg2);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="font-size:13px;font-weight:600;color:var(--text)">Av. Chivilcoy 4475, CABA · CP 1419</span>
+            <button onclick="copiarOrigenCA(this)" style="background:#004B9C;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:4px"><i class="ti ti-copy" style="font-size:12px"></i> Copiar</button>
+          </div>
+          <button class="btn btn-ca" id="btn-ca" onclick="abrirCorreo()"><i class="ti ti-external-link" style="font-size:14px"></i> Calcular en Correo Argentino</button>
         </div>
         <div class="envio-box">
-          <div class="envio-logo" style="color:#6d28d9"><i class="ti ti-car" style="font-size:16px"></i> Cabify Envíos</div>
-          <div class="envio-desc">Envío express desde <strong style="color:var(--text)">Av. Chivilcoy 4475, CABA</strong>. Cotizá en tiempo real.</div>
-          <button class="btn btn-cb" id="btn-cb" onclick="abrirCabify()" disabled><i class="ti ti-external-link" style="font-size:14px"></i> Cotizar en Cabify</button>
-          <div class="envio-hint" id="cb-hint">Ingresá tu dirección para habilitar</div>
+          <div class="envio-logo" style="color:#1a1a1a"><i class="ti ti-car" style="font-size:16px"></i> Uber Envíos</div>
+          <div class="envio-desc">Pedí un envío express por Uber. Usá esta dirección de recogida:</div>
+          <div style="background:var(--bg2);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="font-size:13px;font-weight:600;color:var(--text)">Av. Chivilcoy 4475, CABA</span>
+            <button onclick="copiarOrigen(this)" style="background:var(--olive);color:var(--white);border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:4px"><i class="ti ti-copy" style="font-size:12px"></i> Copiar</button>
+          </div>
+          <button class="btn btn-ub" id="btn-cb" onclick="abrirUber()" disabled><i class="ti ti-external-link" style="font-size:14px"></i> Abrir Uber Envíos</button>
+          <div class="envio-hint" id="cb-hint">Ingresá tu dirección de entrega para habilitar</div>
         </div>
       </div>
 
@@ -306,19 +313,39 @@ window.onDirChange = () => {
   const dir = document.getElementById('c-dir').value.trim();
   const cp = document.getElementById('c-cp').value.trim();
   limpiarErr('e-dir');
-  const btnCa=document.getElementById('btn-ca'), btnCb=document.getElementById('btn-cb');
-  const caH=document.getElementById('ca-hint'), cbH=document.getElementById('cb-hint');
-  if(dir&&cp){ btnCa.disabled=false; caH.textContent='Listo — abre en nueva pestaña'; caH.style.color='#5c6a28'; }
-  else if(dir){ btnCa.disabled=true; caH.textContent='Ingresá también el código postal'; caH.style.color='#7a7060'; }
-  else{ btnCa.disabled=true; caH.textContent='Ingresá tu dirección y CP para habilitar'; caH.style.color='#7a7060'; }
-  if(dir){ btnCb.disabled=false; cbH.textContent='Listo — abre en nueva pestaña'; cbH.style.color='#5c6a28'; }
-  else{ btnCb.disabled=true; cbH.textContent='Ingresá tu dirección para habilitar'; cbH.style.color='#7a7060'; }
+  const btnCb=document.getElementById('btn-cb');
+  const cbH=document.getElementById('cb-hint');
+  if(dir){ btnCb.disabled=false; cbH.textContent='Listo — abre Uber con tu dirección de entrega'; cbH.style.color='#5c6a28'; }
+  else{ btnCb.disabled=true; cbH.textContent='Ingresá tu dirección de entrega para habilitar'; cbH.style.color='#7a7060'; }
 };
 
 window.abrirCorreo = () => window.open('https://www.correoargentino.com.ar/MiCorreo/public/tarifas','_blank');
-window.abrirCabify = () => {
+
+window.copiarOrigenCA = (btn) => {
+  navigator.clipboard.writeText('Av. Chivilcoy 4475, CABA, CP 1419').then(() => {
+    btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i> Copiado';
+    btn.style.background = '#1a4a7a';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i> Copiar';
+      btn.style.background = '#004B9C';
+    }, 2000);
+  });
+};
+
+window.copiarOrigen = (btn) => {
+  navigator.clipboard.writeText('Av. Chivilcoy 4475, CABA').then(() => {
+    btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i> Copiado';
+    btn.style.background = 'var(--olive2)';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i> Copiar';
+      btn.style.background = 'var(--olive)';
+    }, 2000);
+  });
+};
+
+window.abrirUber = () => {
   const dir = document.getElementById('c-dir').value.trim();
-  window.open(`https://cabify.com/ar/envios?origin=${encodeURIComponent(ORIGEN)}&destination=${encodeURIComponent(dir+', Argentina')}`,'_blank');
+  window.open(`https://m.uber.com/ul/?action=setPickup&pickup[formatted_address]=${encodeURIComponent('Av. Chivilcoy 4475, CABA, Argentina')}&dropoff[formatted_address]=${encodeURIComponent(dir+', Argentina')}`,'_blank');
 };
 
 function validar(){
