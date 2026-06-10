@@ -118,6 +118,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <button class="nav-btn" id="nb-cobros" onclick="goTab('cobros')"><i class="ti ti-coin"></i> Cobros</button>
     <button class="nav-btn" id="nb-gastos" onclick="goTab('gastos')"><i class="ti ti-receipt"></i> Gastos</button>
     <button class="nav-btn" id="nb-alertas" onclick="goTab('alertas')"><i class="ti ti-bell"></i> Alertas</button>
+    <button class="nav-btn" id="nb-clientes" onclick="goTab('clientes')"><i class="ti ti-users"></i> Clientes</button>
   </div>
 
   <div class="content">
@@ -246,6 +247,19 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <div class="section" id="s-alertas">
       <div id="alertas-content"><div class="empty">Sin alertas activas</div></div>
     </div>
+
+    <div class="section" id="s-clientes">
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-users"></i> Base de clientes</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-size:13px;color:var(--muted)">Total: <strong id="clientes-count" style="color:var(--text)">0</strong> clientes únicos</div>
+          <button class="btn btn-olive btn-sm" onclick="exportarCSV()" style="font-size:12px;padding:7px 14px;margin-bottom:0"><i class="ti ti-download" style="font-size:13px"></i> Exportar CSV</button>
+        </div>
+        <input id="clientes-search" placeholder="Buscar nombre, email o teléfono..." oninput="renderClientes()" style="margin-bottom:10px">
+        <div id="clientes-list"><div class="empty">Sin clientes aún</div></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -324,6 +338,7 @@ window.goTab=tab=>{
   if(tab==='cobros')renderCobros();
   if(tab==='gastos'){renderGastos();renderResumen();}
   if(tab==='alertas')renderAlertas();
+  if(tab==='clientes')renderClientes();
 };
 
 window.actualizarStock=async()=>{
@@ -491,6 +506,71 @@ function renderAlertas(){
   if(!html)html='<div class="empty">Sin alertas activas</div>';
   document.getElementById('alertas-content').innerHTML=html;
 }
+function renderClientes(){
+  // Construir lista única de clientes desde pedidos
+  const mapa = {};
+  S.pedidos.forEach(p => {
+    const key = p.email || p.tel || p.nombre;
+    if(!mapa[key]) {
+      mapa[key] = {
+        nombre: p.nombre,
+        email: p.email || '—',
+        tel: p.tel || '—',
+        dir: p.dir || '—',
+        pedidos: 0,
+        ultimo: p.fecha || '—'
+      };
+    }
+    mapa[key].pedidos++;
+    if(p.fecha > mapa[key].ultimo) mapa[key].ultimo = p.fecha;
+  });
+  
+  let clientes = Object.values(mapa);
+  
+  const q = document.getElementById('clientes-search')?.value?.toLowerCase() || '';
+  if(q) clientes = clientes.filter(c =>
+    c.nombre.toLowerCase().includes(q) ||
+    c.email.toLowerCase().includes(q) ||
+    c.tel.includes(q)
+  );
+  
+  document.getElementById('clientes-count').textContent = Object.keys(mapa).length;
+  
+  const el = document.getElementById('clientes-list');
+  if(!clientes.length) { el.innerHTML='<div class="empty">Sin clientes aún</div>'; return; }
+  
+  el.innerHTML = clientes.map(c => `
+    <div class="row" style="flex-direction:column;align-items:flex-start;gap:4px">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+        <div style="font-weight:600;font-size:14px">${c.nombre}</div>
+        <span style="font-size:11px;color:var(--muted)">${c.pedidos} pedido${c.pedidos>1?'s':''}</span>
+      </div>
+      <div style="font-size:12px;color:var(--olive2);display:flex;align-items:center;gap:4px"><i class="ti ti-mail" style="font-size:12px"></i> ${c.email}</div>
+      <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px"><i class="ti ti-phone" style="font-size:12px"></i> ${c.tel}</div>
+      <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><i class="ti ti-map-pin" style="font-size:11px"></i> ${c.dir}</div>
+    </div>`).join('');
+}
+
+window.exportarCSV = () => {
+  const mapa = {};
+  S.pedidos.forEach(p => {
+    const key = p.email || p.tel || p.nombre;
+    if(!mapa[key]) mapa[key] = { nombre:p.nombre, email:p.email||'', tel:p.tel||'', dir:p.dir||'', pedidos:0, ultimo:p.fecha||'' };
+    mapa[key].pedidos++;
+    if(p.fecha > mapa[key].ultimo) mapa[key].ultimo = p.fecha;
+  });
+  const clientes = Object.values(mapa);
+  if(!clientes.length) { alert('Sin clientes para exportar'); return; }
+  const header = 'Nombre,Email,Teléfono,Dirección,Pedidos,Último pedido\n';
+  const rows = clientes.map(c =>
+    `"${c.nombre}","${c.email}","${c.tel}","${c.dir}",${c.pedidos},"${c.ultimo}"`
+  ).join('\n');
+  const blob = new Blob(['\ufeff'+header+rows], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'pistacchielo-clientes.csv';
+  a.click(); URL.revokeObjectURL(url);
+};
 </script>
 </body>
 </html>
