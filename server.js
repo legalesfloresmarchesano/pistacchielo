@@ -12,17 +12,23 @@ const mimeTypes = {
 };
 
 http.createServer((req, res) => {
-  let filePath = '.' + req.url;
+  let url = req.url.split('?')[0];
   
-  if (filePath === './' || filePath === './index') {
-    filePath = './index.html';
-  }
+  const routes = {
+    '/': './index.html',
+    '/index': './index.html',
+    '/index.html': './index.html',
+    '/pedido': './pedido.html',
+    '/pedido.html': './pedido.html',
+  };
+
+  let filePath = routes[url];
   
-  if (!path.extname(filePath)) {
-    filePath = filePath + '.html';
+  if (!filePath) {
+    filePath = '.' + url;
   }
 
-  const ext = path.extname(filePath);
+  const ext = path.extname(filePath) || '.html';
   const contentType = mimeTypes[ext] || 'text/plain';
 
   fs.readFile(filePath, (err, data) => {
