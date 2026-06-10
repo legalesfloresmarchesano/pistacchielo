@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pistacchielo — Hacer un pedido</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f0;color:#1a1a1a}
+.app{max-width:480px;margin:0 auto;background:#f0f2f0;min-height:100vh}
+#loading{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#2d5a1b;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.topbar{background:#2d5a1b;padding:12px 16px 14px;display:flex;align-items:center;gap:10px}
+.lc{width:34px;height:34px;background:#a8d878;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lc i{font-size:17px;color:#2d5a1b}
+.brand{font-family:'Dancing Script',cursive;font-size:24px;color:#e8f5d0;flex:1;line-height:1.2}
+.brand-sub{font-size:11px;color:#a8d878}
+.tabs{display:flex;background:#fff;border-bottom:0.5px solid #e0e0e0}
+.tab{flex:1;padding:11px 8px;font-size:12px;font-weight:500;text-align:center;border:none;background:transparent;cursor:pointer;color:#888;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px}
+.tab.on{color:#2d5a1b;border-bottom-color:#2d5a1b}
+.body{padding:14px;padding-bottom:30px}
+.section{display:none}.section.active{display:block}
+.card{background:#fff;border-radius:14px;border:0.5px solid #e0e0e0;padding:14px;margin-bottom:10px}
+.card-hd{font-size:13px;font-weight:500;color:#2d5a1b;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+input,select,textarea{width:100%;padding:10px 12px;border:0.5px solid #ccc;border-radius:10px;font-size:14px;background:#fff;color:#1a1a1a;font-family:inherit;margin-bottom:8px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#3a7d1e;box-shadow:0 0 0 2px rgba(58,125,30,0.12)}
+label{font-size:12px;color:#666;display:block;margin-bottom:3px}
+.req{color:#c0392b;margin-left:2px}
+.btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;border:none;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-g{background:#2d5a1b;color:#e8f5d0}.btn-g:active{background:#1e3e12}
+.btn-ca{background:#004B9C;color:#fff}
+.btn-ub{background:#1a1a1a;color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hero{background:#2d5a1b;border-radius:16px;padding:20px;margin-bottom:10px;text-align:center}
+.hero-brand{font-family:'Dancing Script',cursive;font-size:38px;color:#e8f5d0}
+.hero-sub{font-size:13px;color:#a8d878;margin-top:4px}
+.hero-tag{display:inline-block;background:#a8d878;color:#173404;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;margin-top:10px}
+.info-box{background:#eaf3de;border:0.5px solid #97c459;border-radius:10px;padding:10px 12px;display:flex;gap:8px;margin-bottom:10px}
+.info-box i{color:#27500a;font-size:16px;flex-shrink:0;margin-top:1px}
+.it{font-size:13px;font-weight:500;color:#173404}.is{font-size:12px;color:#3b6d11;margin-top:1px}
+.cant-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.cant-btn{width:46px;height:46px;border-radius:10px;border:1.5px solid #3a7d1e;background:transparent;font-size:24px;cursor:pointer;color:#2d5a1b;font-weight:500;display:flex;align-items:center;justify-content:center}
+.cant-btn:active{background:#eaf3de}
+.cant-n{flex:1;text-align:center;font-size:36px;font-weight:500;color:#2d5a1b}
+.cant-lbl{font-size:12px;color:#666;text-align:center;margin-bottom:10px}
+.precio-box{border-radius:10px;padding:12px 14px;margin-top:4px;margin-bottom:4px}
+.precio-box.n1{background:#f5f5f5;border:0.5px solid #e0e0e0}
+.precio-box.n2{background:#eaf3de;border:0.5px solid #97c459}
+.precio-box.n3{background:#2d5a1b;border:none}
+.precio-tag{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;margin-bottom:4px}
+.t1{background:#e0e0e0;color:#444}.t2{background:#c0dd97;color:#27500a}.t3{background:#a8d878;color:#173404}
+.envio-box{border-radius:10px;padding:12px;margin-bottom:8px;border:0.5px solid #e0e0e0}
+.envio-logo{font-size:13px;font-weight:500;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.envio-desc{font-size:12px;color:#666;margin-bottom:8px;line-height:1.4}
+.envio-hint{font-size:11px;color:#888;text-align:center;margin-top:4px}
+.row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:0.5px solid #eee}
+.row:last-child{border-bottom:none}
+.ri{flex:1;min-width:0}.rn{font-size:13px;font-weight:500}.rs{font-size:11px;color:#888;margin-top:1px}
+.rv{font-size:13px;font-weight:500;color:#2d5a1b;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.ba{background:#faeeda;color:#633806}.bb{background:#e6f1fb;color:#0c447c}.bg{background:#eaf3de;color:#27500a}
+.confirm-box{background:#2d5a1b;border-radius:16px;padding:24px;text-align:center;margin-bottom:10px}
+.confirm-check{width:52px;height:52px;background:#a8d878;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.confirm-brand{font-family:'Dancing Script',cursive;font-size:28px;color:#e8f5d0;margin-bottom:4px}
+.confirm-sub{font-size:13px;color:#a8d878}
+.err{color:#c0392b;font-size:12px;margin:-4px 0 6px}
+.price-table{width:100%;border-collapse:collapse;font-size:13px}
+.price-table tr{border-bottom:0.5px solid #eee}
+.price-table tr:last-child{border-bottom:none}
+.price-table td{padding:8px 4px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div style="font-family:'Dancing Script',cursive;font-size:28px;color:#2d5a1b">Pistacchielo</div>
+</div>
+
+<div id="main-app" class="app" style="display:none">
+  <div class="topbar">
+    <div class="lc"><i class="ti ti-leaf"></i></div>
+    <div><div class="brand">Pistacchielo</div><div class="brand-sub">Portal de pedidos</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tb-pedido" onclick="goTab('pedido')"><i class="ti ti-shopping-cart" style="font-size:13px"></i> Nuevo pedido</button>
+    <button class="tab" id="tb-precios" onclick="goTab('precios')"><i class="ti ti-tag" style="font-size:13px"></i> Precios</button>
+    <button class="tab" id="tb-mis" onclick="goTab('mis')"><i class="ti ti-list" style="font-size:13px"></i> Mis pedidos</button>
+  </div>
+
+  <div class="body">
+
+    <div class="section active" id="s-pedido">
+      <div class="hero">
+        <div class="hero-brand">Pistacchielo</div>
+        <div class="hero-sub">Licor de Crema de Pistacho<br>Gennarino Francescoli · Italia</div>
+        <div class="hero-tag">Pedido online</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle"></i>
+        <div><div class="it">Completá tu pedido</div><div class="is">Te contactamos para confirmar entrega y pago</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-user"></i> Tus datos</div>
+        <label>Nombre / empresa <span class="req">*</span></label>
+        <input id="c-nombre" placeholder="Ej: Bar La Esquina" oninput="limpiarErr('e-nombre')">
+        <div id="e-nombre" class="err" style="display:none">Ingresá tu nombre</div>
+        <label>Teléfono / WhatsApp <span class="req">*</span></label>
+        <input id="c-tel" type="tel" placeholder="+54 11 ..." oninput="limpiarErr('e-tel')">
+        <div id="e-tel" class="err" style="display:none">Ingresá tu teléfono</div>
+        <label>Email <span class="req">*</span></label>
+        <input id="c-email" type="email" placeholder="tu@email.com" oninput="limpiarErr('e-email')">
+        <div id="e-email" class="err" style="display:none">Ingresá tu email</div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-package"></i> Cantidad y precio</div>
+        <div class="cant-row">
+          <button class="cant-btn" onclick="adj(-1)" aria-label="Restar">−</button>
+          <div class="cant-n" id="cant-n">1</div>
+          <button class="cant-btn" onclick="adj(1)" aria-label="Sumar">+</button>
+        </div>
+        <div class="cant-lbl">botellas de Pistacchielo 700ml · 17% vol.</div>
+        <div id="precio-display"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-map-pin"></i> Entrega</div>
+        <label>Dirección completa <span class="req">*</span></label>
+        <input id="c-dir" placeholder="Calle, número, piso, localidad" oninput="onDirChange()">
+        <div id="e-dir" class="err" style="display:none">Ingresá la dirección de entrega</div>
+        <label>Código postal</label>
+        <input id="c-cp" placeholder="Ej: 1406" maxlength="8" oninput="onDirChange()">
+        <label>Fecha preferida</label>
+        <input type="date" id="c-fecha">
+        <label>Franja horaria <span class="req">*</span></label>
+        <select id="c-horario" onchange="limpiarErr('e-horario')">
+          <option value="">— Elegí una franja —</option>
+          <option>Mañana (9:00–13:00)</option>
+          <option>Mediodía (13:00–16:00)</option>
+          <option>Tarde (16:00–20:00)</option>
+          <option>Cualquier horario</option>
+        </select>
+        <div id="e-horario" class="err" style="display:none">Elegí una franja horaria</div>
+        <label>Mensaje adicional</label>
+        <textarea id="c-msg" rows="2" placeholder="Indicaciones, acceso, timbre, etc."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-truck"></i> Consultar envío</div>
+        <div style="font-size:12px;color:#666;margin-bottom:10px;line-height:1.5">El costo de envío corre por cuenta del comprador.</div>
+        <div class="envio-box" style="border-color:#004B9C33">
+          <div class="envio-logo" style="color:#004B9C"><i class="ti ti-mail" style="font-size:15px"></i> Correo Argentino</div>
+          <div class="envio-desc">Calculá según tu código postal. Retiro en sucursal o entrega a domicilio.</div>
+          <button class="btn btn-ca" id="btn-ca" onclick="abrirCorreo()" disabled><i class="ti ti-external-link" style="font-size:14px"></i> Calcular en Correo Argentino</button>
+          <div class="envio-hint" id="ca-hint">Ingresá dirección y CP para habilitar</div>
+        </div>
+        <div class="envio-box">
+          <div class="envio-logo"><i class="ti ti-car" style="font-size:15px"></i> Uber Envíos</div>
+          <div class="envio-desc">Envío express desde <strong>Av. Chivilcoy 4475, CABA</strong>. Cotizá en tiempo real.</div>
+          <button class="btn btn-ub" id="btn-ub" onclick="abrirUber()" disabled><i class="ti ti-external-link" style="font-size:14px"></i> Cotizar en Uber Envíos</button>
+          <div class="envio-hint" id="ub-hint">Ingresá tu dirección para habilitar</div>
+        </div>
+      </div>
+
+      <button class="btn btn-g" id="btn-enviar" onclick="enviarPedido()"><i class="ti ti-send" style="font-size:15px"></i> Enviar pedido</button>
+    </div>
+
+    <div class="section" id="s-precios">
+      <div class="hero" style="padding:18px">
+        <div class="hero-brand" style="font-size:30px">Pistacchielo</div>
+        <div class="hero-sub">Lista de precios</div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-tag"></i> Precios por cantidad</div>
+        <table class="price-table">
+          <tr><td style="color:#888">Cantidad</td><td style="color:#888">Precio c/u</td><td style="color:#888">Ahorro</td></tr>
+          <tr><td>1–5 botellas</td><td style="font-weight:500">$45.000</td><td>—</td></tr>
+          <tr style="background:#eaf3de"><td>Caja × 6 (6–23 bot.)</td><td style="font-weight:500;color:#27500a">$34.500</td><td><span style="background:#c0dd97;color:#173404;font-size:11px;padding:2px 7px;border-radius:10px;font-weight:500">−23%</span></td></tr>
+          <tr style="background:#d4edba"><td>4 cajas o más (24+ bot.)</td><td style="font-weight:500;color:#2d5a1b">$29.500</td><td><span style="background:#a8d878;color:#173404;font-size:11px;padding:2px 7px;border-radius:10px;font-weight:500">−34%</span></td></tr>
+        </table>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle"></i>
+        <div><div class="it">Pistacchielo 700ml · 17% vol.</div><div class="is">Licor de Crema de Pistacho · Gennarino Francescoli · Importado de Italia</div></div>
+      </div>
+      <button class="btn btn-g" onclick="goTab('pedido')"><i class="ti ti-shopping-cart" style="font-size:15px"></i> Hacer un pedido</button>
+    </div>
+
+    <div class="section" id="s-mis">
+      <div class="info-box">
+        <i class="ti ti-info-circle"></i>
+        <div><div class="it">Tus pedidos</div><div class="is">Una vez confirmados te avisamos por WhatsApp o email</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-list"></i> Historial</div>
+        <div id="mis-list"><div style="text-align:center;padding:20px;font-size:13px;color:#888">Sin pedidos enviados aún</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, onSnapshot, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDze2-_UdQLrNrleUSO7SmM4IcKBQb2h6A",
+  authDomain: "pistacchielo-1dc03.firebaseapp.com",
+  projectId: "pistacchielo-1dc03",
+  storageBucket: "pistacchielo-1dc03.firebasestorage.app",
+  messagingSenderId: "376347125253",
+  appId: "1:376347125253:web:4cc926d481658b08fa5e6c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById('loading').style.display = 'none';
+document.getElementById('main-app').style.display = 'block';
+document.getElementById('c-fecha').value = today();
+
+const PRECIOS = [
+  { min:24, pcu:29500, label:'4 cajas o más', desc:'−34%', nivel:3 },
+  { min:6,  pcu:34500, label:'Por caja (×6)',  desc:'−23%', nivel:2 },
+  { min:1,  pcu:45000, label:'Precio unitario', desc:null,  nivel:1 },
+];
+const ORIGEN = 'Av. Chivilcoy 4475, CABA, Argentina';
+let cant = 1;
+let misPedidosIds = JSON.parse(sessionStorage.getItem('pist_ids')||'[]');
+let pedidosData = [];
+
+function today(){ const d=new Date(); return d.toISOString().split('T')[0]; }
+function fmtF(f){ if(!f)return'—'; const d=new Date(f+'T00:00:00'); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}); }
+function fmtP(n){ return '$'+Math.round(n).toLocaleString('es-AR'); }
+function getPrecio(n){ return PRECIOS.find(p=>n>=p.min); }
+
+window.adj = n => {
+  cant = Math.max(1, Math.min(99, cant+n));
+  document.getElementById('cant-n').textContent = cant;
+  renderPrecio();
+};
+
+function renderPrecio(){
+  const p = getPrecio(cant);
+  const total = cant * p.pcu;
+  const nc = ['','n1','n2','n3'][p.nivel];
+  const tc = ['','t1','t2','t3'][p.nivel];
+  const vc = p.nivel===3?'color:#e8f5d0':'color:#1a1a1a';
+  const sc = p.nivel===3?'color:#a8d878':'color:#666';
+  document.getElementById('precio-display').innerHTML = `
+    <div class="precio-box ${nc}">
+      <div><span class="precio-tag ${tc}">${p.label}${p.desc?' · '+p.desc:''}</span></div>
+      <div style="font-size:22px;font-weight:500;${vc}">${fmtP(p.pcu)} <span style="font-size:14px;font-weight:400;${sc}">por botella</span></div>
+      <div style="font-size:14px;font-weight:500;${sc};margin-top:2px">Total: <strong style="${vc}">${fmtP(total)}</strong></div>
+    </div>`;
+}
+
+window.goTab = t => {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('s-'+t).classList.add('active');
+  document.getElementById('tb-'+t).classList.add('on');
+  if(t==='mis') renderMis();
+};
+
+window.limpiarErr = id => document.getElementById(id).style.display='none';
+
+window.onDirChange = () => {
+  const dir = document.getElementById('c-dir').value.trim();
+  const cp = document.getElementById('c-cp').value.trim();
+  limpiarErr('e-dir');
+  const btnCa=document.getElementById('btn-ca'), btnUb=document.getElementById('btn-ub');
+  const caH=document.getElementById('ca-hint'), ubH=document.getElementById('ub-hint');
+  if(dir&&cp){ btnCa.disabled=false; caH.textContent='Listo — abre en nueva pestaña'; caH.style.color='#27500a'; }
+  else if(dir){ btnCa.disabled=true; caH.textContent='Ingresá también el código postal'; caH.style.color='#888'; }
+  else{ btnCa.disabled=true; caH.textContent='Ingresá dirección y CP para habilitar'; caH.style.color='#888'; }
+  if(dir){ btnUb.disabled=false; ubH.textContent='Listo — abre en nueva pestaña'; ubH.style.color='#27500a'; }
+  else{ btnUb.disabled=true; ubH.textContent='Ingresá tu dirección para habilitar'; ubH.style.color='#888'; }
+};
+
+window.abrirCorreo = () => {
+  const cp = document.getElementById('c-cp').value.trim();
+  window.open(`https://www.correoargentino.com.ar/formularios/oca?cpDestino=${encodeURIComponent(cp)}&cpOrigen=1406`,'_blank');
+};
+
+window.abrirUber = () => {
+  const dir = document.getElementById('c-dir').value.trim();
+  window.open(`https://m.uber.com/ul/?action=setPickup&pickup[formatted_address]=${encodeURIComponent(ORIGEN)}&dropoff[formatted_address]=${encodeURIComponent(dir+', Argentina')}`,'_blank');
+};
+
+function validar(){
+  let ok=true;
+  [{id:'c-nombre',err:'e-nombre',msg:'Ingresá tu nombre'},{id:'c-tel',err:'e-tel',msg:'Ingresá tu teléfono'},{id:'c-email',err:'e-email',msg:'Ingresá tu email'},{id:'c-dir',err:'e-dir',msg:'Ingresá la dirección'}].forEach(c=>{
+    if(!document.getElementById(c.id).value.trim()){const el=document.getElementById(c.err);el.textContent=c.msg;el.style.display='block';ok=false;}
+  });
+  if(!document.getElementById('c-horario').value){document.getElementById('e-horario').style.display='block';ok=false;}
+  return ok;
+}
+
+window.enviarPedido = async () => {
+  if(!validar()) return;
+  const nombre=document.getElementById('c-nombre').value.trim();
+  const tel=document.getElementById('c-tel').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const dir=document.getElementById('c-dir').value.trim();
+  const cp=document.getElementById('c-cp').value.trim();
+  const fecha=document.getElementById('c-fecha').value||today();
+  const horario=document.getElementById('c-horario').value;
+  const mensaje=document.getElementById('c-msg').value;
+  const p=getPrecio(cant);
+  const total=cant*p.pcu;
+  const btn=document.getElementById('btn-enviar');
+  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader" style="font-size:15px"></i> Enviando...';
+  try {
+    const ref = await addDoc(collection(db,'pedidos'),{
+      nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,fecha,horario,mensaje,
+      estado:'nuevo',hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
+      creadoEn:serverTimestamp()
+    });
+    misPedidosIds=[ref.id,...misPedidosIds];
+    sessionStorage.setItem('pist_ids',JSON.stringify(misPedidosIds));
+    document.getElementById('s-pedido').innerHTML=`
+      <div class="confirm-box">
+        <div class="confirm-check"><i class="ti ti-check" style="font-size:24px;color:#173404"></i></div>
+        <div class="confirm-brand">Pistacchielo</div>
+        <div class="confirm-sub">${nombre} · ${cant} botella${cant>1?'s':''}</div>
+        <div style="font-size:14px;color:#a8d878;margin-top:4px;font-weight:500">${fmtP(total)}</div>
+        <div style="font-size:12px;color:#7acc44;margin-top:2px">${fmtF(fecha)} · ${horario}</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-check" style="color:#27500a;font-size:16px;flex-shrink:0;margin-top:1px"></i>
+        <div><div class="it">¡Pedido recibido!</div><div class="is">Te contactamos pronto al ${tel} o ${email}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-receipt"></i> Resumen del pedido</div>
+        <div class="row"><div class="ri"><div class="rn">Botellas</div></div><div class="rv">${cant}</div></div>
+        <div class="row"><div class="ri"><div class="rn">Precio por botella</div></div><div class="rv">${fmtP(p.pcu)}</div></div>
+        <div class="row"><div class="ri"><div class="rn" style="font-weight:600">Total estimado</div></div><div class="rv" style="font-size:16px">${fmtP(total)}</div></div>
+        <div class="row"><div class="ri"><div class="rn">Dirección</div><div class="rs">${dir}${cp?' · CP '+cp:''}</div></div></div>
+        <div class="row"><div class="ri"><div class="rn">Entrega</div></div><div class="rv" style="font-size:12px">${fmtF(fecha)} · ${horario}</div></div>
+      </div>
+      <button class="btn btn-g" onclick="goTab('mis')"><i class="ti ti-list" style="font-size:15px"></i> Ver mis pedidos</button>`;
+  } catch(e) {
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-send" style="font-size:15px"></i> Enviar pedido';
+    alert('Error al enviar. Intentá de nuevo.');
+  }
+};
+
+function renderMis(){
+  const el=document.getElementById('mis-list');
+  if(!misPedidosIds.length){el.innerHTML='<div style="text-align:center;padding:20px;font-size:13px;color:#888">Sin pedidos enviados aún</div>';return;}
+  const label={nuevo:'Pendiente de confirmar',confirmado:'Confirmado',entregado:'Entregado'};
+  const badge={nuevo:'ba',confirmado:'bb',entregado:'bg'};
+  const mios=pedidosData.filter(p=>misPedidosIds.includes(p.id));
+  if(!mios.length){el.innerHTML='<div style="text-align:center;padding:20px;font-size:13px;color:#888">Cargando...</div>';return;}
+  el.innerHTML=mios.map(p=>`
+    <div class="row">
+      <div class="ri">
+        <div class="rn">${p.units} bot. · ${fmtP(p.monto||0)} <span class="badge ${badge[p.estado]||'ba'}">${label[p.estado]||'Pendiente'}</span></div>
+        <div class="rs">${fmtF(p.fecha)} · ${p.horario}</div>
+        <div class="rs">${p.dir}</div>
+      </div>
+    </div>`).join('');
+}
+
+if(misPedidosIds.length){
+  onSnapshot(query(collection(db,'pedidos'),orderBy('creadoEn','desc')),snap=>{
+    pedidosData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMis();
+  });
+}
+
+renderPrecio();
+</script>
+</body>
+</html>
