@@ -2,22 +2,37 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const mimeTypes = {
   '.html': 'text/html',
-  '.css': 'text/css', 
+  '.css': 'text/css',
   '.js': 'application/javascript',
   '.json': 'application/json',
 };
 
 http.createServer((req, res) => {
   let filePath = '.' + req.url;
-  if (filePath === './') filePath = './index.html';
+  
+  if (filePath === './' || filePath === './index') {
+    filePath = './index.html';
+  }
+  
+  if (!path.extname(filePath)) {
+    filePath = filePath + '.html';
+  }
+
   const ext = path.extname(filePath);
   const contentType = mimeTypes[ext] || 'text/plain';
+
   fs.readFile(filePath, (err, data) => {
-    if (err) { res.writeHead(404); res.end('Not found'); return; }
+    if (err) {
+      fs.readFile('./index.html', (err2, data2) => {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data2);
+      });
+      return;
+    }
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(data);
   });
