@@ -167,6 +167,15 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
           <option>Cualquier horario</option>
         </select>
         <div id="e-horario" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Elegí una franja horaria</div>
+        <label>Método de envío preferido <span class="req">*</span></label>
+        <select id="c-envio" onchange="limpiarErr('e-envio')">
+          <option value="">— Elegí cómo querés recibirlo —</option>
+          <option value="uber">Uber Envíos (express, CABA y GBA)</option>
+          <option value="correo">Correo Argentino (todo el país)</option>
+          <option value="retiro">Retiro en depósito (Av. Chivilcoy 4475, CABA)</option>
+          <option value="coordinar">Coordinar con el vendedor</option>
+        </select>
+        <div id="e-envio" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Elegí un método de envío</div>
         <label>Indicaciones adicionales</label>
         <textarea id="c-msg" rows="2" placeholder="Acceso, timbre, referencia..."></textarea>
       </div>
@@ -354,6 +363,7 @@ function validar(){
     if(!document.getElementById(c.id).value.trim()){const el=document.getElementById(c.err);el.innerHTML=`<i class="ti ti-alert-circle" style="font-size:13px"></i> ${c.msg}`;el.style.display='flex';ok=false;}
   });
   if(!document.getElementById('c-horario').value){document.getElementById('e-horario').style.display='flex';ok=false;}
+  if(!document.getElementById('c-envio').value){document.getElementById('e-envio').style.display='flex';ok=false;}
   return ok;
 }
 
@@ -366,13 +376,14 @@ window.enviarPedido = async () => {
   const cp=document.getElementById('c-cp').value.trim();
   const fecha=document.getElementById('c-fecha').value||today();
   const horario=document.getElementById('c-horario').value;
+  const envio=document.getElementById('c-envio').value;
   const mensaje=document.getElementById('c-msg').value;
   const p=getPrecio(cant);
   const total=cant*p.pcu;
   const btn=document.getElementById('btn-enviar');
   btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2" style="font-size:15px"></i> Enviando...';
   try {
-    const ref = await addDoc(collection(db,'pedidos'),{nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,fecha,horario,mensaje,estado:'nuevo',hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),creadoEn:serverTimestamp()});
+    const ref = await addDoc(collection(db,'pedidos'),{nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,fecha,horario,envio,mensaje,estado:'nuevo',hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),creadoEn:serverTimestamp()});
     misPedidosIds=[ref.id,...misPedidosIds];
     sessionStorage.setItem('pist_ids',JSON.stringify(misPedidosIds));
     document.getElementById('s-pedido').innerHTML=`
@@ -394,6 +405,7 @@ window.enviarPedido = async () => {
         <div class="row"><div class="ri"><div class="rn" style="font-weight:700">Total estimado</div></div><div class="rv" style="font-size:16px;color:#7a8c3a">${fmtP(total)}</div></div>
         <div class="row"><div class="ri"><div class="rn">Dirección</div><div class="rs">${dir}${cp?' · CP '+cp:''}</div></div></div>
         <div class="row"><div class="ri"><div class="rn">Entrega</div></div><div class="rv" style="font-size:12px">${fmtF(fecha)} · ${horario}</div></div>
+        <div class="row"><div class="ri"><div class="rn">Método de envío</div></div><div class="rv" style="font-size:12px">${{uber:'Uber Envíos',correo:'Correo Argentino',retiro:'Retiro en depósito',coordinar:'Coordinar con vendedor'}[envio]||envio}</div></div>
       </div>
       <button class="btn btn-g" onclick="goTab('mis')"><i class="ti ti-list" style="font-size:15px"></i> Ver mis pedidos</button>`;
   } catch(e) {
