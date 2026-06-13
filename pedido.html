@@ -178,6 +178,15 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
           <option value="coordinar">Coordinar con el vendedor</option>
         </select>
         <div id="e-envio" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Elegí un método de envío</div>
+        <label>Forma de pago preferida <span class="req">*</span></label>
+        <select id="c-pago" onchange="limpiarErr('e-pago')">
+          <option value="">— Elegí cómo querés pagar —</option>
+          <option value="transferencia">Transferencia bancaria</option>
+          <option value="mercadopago">MercadoPago</option>
+          <option value="efectivo">Efectivo</option>
+          <option value="coordinar">Coordinar con el vendedor</option>
+        </select>
+        <div id="e-pago" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Elegí una forma de pago</div>
         <label>Indicaciones adicionales</label>
         <textarea id="c-msg" rows="2" placeholder="Acceso, timbre, referencia..."></textarea>
       </div>
@@ -358,6 +367,7 @@ function validar(){
   });
   if(!document.getElementById('c-horario').value){document.getElementById('e-horario').style.display='flex';ok=false;}
   if(!document.getElementById('c-envio').value){document.getElementById('e-envio').style.display='flex';ok=false;}
+  if(!document.getElementById('c-pago').value){document.getElementById('e-pago').style.display='flex';ok=false;}
   return ok;
 }
 
@@ -371,6 +381,7 @@ window.enviarPedido = async () => {
   const fecha   = document.getElementById('c-fecha').value||today();
   const horario = document.getElementById('c-horario').value;
   const envio   = document.getElementById('c-envio').value;
+  const pago    = document.getElementById('c-pago').value;
   const mensaje = document.getElementById('c-msg').value;
   const p       = getPrecio(cant);
   const total   = cant * p.pcu;
@@ -380,7 +391,7 @@ window.enviarPedido = async () => {
   try {
     const ref = await addDoc(collection(db,'pedidos'),{
       nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,
-      fecha,horario,envio,mensaje,estado:'nuevo',
+      fecha,horario,envio,pago,mensaje,estado:'nuevo',
       hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
       creadoEn:serverTimestamp()
     });
@@ -404,6 +415,7 @@ window.enviarPedido = async () => {
       fecha_entrega:  fmtF(fecha),
       horario:        horario,
       envio:          envioLabel,
+      forma_pago:     {transferencia:'Transferencia bancaria',mercadopago:'MercadoPago',efectivo:'Efectivo',coordinar:'Coordinar con vendedor'}[pago]||pago,
       notas:          mensaje || '—'
     }).catch(err => console.warn('EmailJS (no crítico):', err));
     // ── fin notificación ──
