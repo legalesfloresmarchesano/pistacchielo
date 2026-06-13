@@ -465,7 +465,20 @@ window.enviarPedido = async () => {
         <div class="row"><div class="ri"><div class="rn">Dirección</div><div class="rs">${dir}${cp?' · CP '+cp:''}</div></div></div>
         <div class="row"><div class="ri"><div class="rn">Entrega</div></div><div class="rv" style="font-size:12px">${fmtF(fecha)} · ${horario}</div></div>
         <div class="row"><div class="ri"><div class="rn">Método de envío</div></div><div class="rv" style="font-size:12px">${envioLabel}</div></div>
+        <div class="row"><div class="ri"><div class="rn">Forma de pago</div></div><div class="rv" style="font-size:12px">${{transferencia:'Transferencia bancaria',efectivo:'Efectivo',coordinar:'Coordinar con vendedor'}[pago]||pago}</div></div>
       </div>
+      ${pago==='transferencia' ? `<div style="background:#eef3dc;border:1px solid #c0cf90;border-radius:10px;padding:14px;margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:#5c6a28;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Datos para tu transferencia</div>
+        <div style="font-size:12px;color:#7a7060;margin-bottom:8px">Banco Ciudad · Caja de ahorro $ · Mariano Flores Marchesano</div>
+        <div style="background:#fffdf7;border:1px solid #d8ccb0;border-radius:8px;padding:9px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:10px;color:#7a7060;margin-bottom:2px">CBU</div><div style="font-size:13px;font-weight:700">0290027810000595901543</div></div>
+          <button onclick="navigator.clipboard.writeText('0290027810000595901543').then(()=>{this.textContent='✓ Copiado';setTimeout(()=>{this.textContent='Copiar'},2000)})" style="background:#7a8c3a;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0">Copiar</button>
+        </div>
+        <div style="background:#fffdf7;border:1px solid #d8ccb0;border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:10px;color:#7a7060;margin-bottom:2px">Alias</div><div style="font-size:13px;font-weight:700">CASOS.PADRE.PELAJE</div></div>
+          <button onclick="navigator.clipboard.writeText('CASOS.PADRE.PELAJE').then(()=>{this.textContent='✓ Copiado';setTimeout(()=>{this.textContent='Copiar'},2000)})" style="background:#7a8c3a;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0">Copiar</button>
+        </div>
+      </div>` : ''}
       ${pago==='transferencia' ? `<a href="https://wa.me/5491168005101?text=Hola%21+Pedido+%23${ref.id.slice(-6).toUpperCase()}+de+${encodeURIComponent(nombre)}+por+${encodeURIComponent(fmtP(total))}.+Te+env%C3%ADo+el+comprobante+de+transferencia." target="_blank" class="btn" style="background:#25D366;color:#fff;text-decoration:none"><i class="ti ti-brand-whatsapp" style="font-size:15px"></i> Enviar comprobante por WhatsApp</a>` : ''}
       <button class="btn btn-g" onclick="goTab('mis')"><i class="ti ti-list" style="font-size:15px"></i> Ver mis pedidos</button>`;
   } catch(e) {
