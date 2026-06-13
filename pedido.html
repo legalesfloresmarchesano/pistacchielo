@@ -466,6 +466,7 @@ window.enviarPedido = async () => {
         <div class="row"><div class="ri"><div class="rn">Entrega</div></div><div class="rv" style="font-size:12px">${fmtF(fecha)} · ${horario}</div></div>
         <div class="row"><div class="ri"><div class="rn">Método de envío</div></div><div class="rv" style="font-size:12px">${envioLabel}</div></div>
       </div>
+      ${pago==='transferencia' ? `<a href="https://wa.me/5491168005101?text=Hola%21+Pedido+%23${ref.id.slice(-6).toUpperCase()}+de+${encodeURIComponent(nombre)}+por+${encodeURIComponent(fmtP(total))}.+Te+env%C3%ADo+el+comprobante+de+transferencia." target="_blank" class="btn" style="background:#25D366;color:#fff;text-decoration:none"><i class="ti ti-brand-whatsapp" style="font-size:15px"></i> Enviar comprobante por WhatsApp</a>` : ''}
       <button class="btn btn-g" onclick="goTab('mis')"><i class="ti ti-list" style="font-size:15px"></i> Ver mis pedidos</button>`;
   } catch(e) {
     btn.disabled=false; btn.innerHTML='<i class="ti ti-send" style="font-size:15px"></i> Confirmar pedido';
