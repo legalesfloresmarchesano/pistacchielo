@@ -6,6 +6,8 @@
 <title>Pistacchielo — Hacer un pedido</title>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('BJMRi4_VceX-T-dUl');</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -277,7 +279,6 @@ const PRECIOS = [
   { min:6,  pcu:34500, label:'Por caja (×6)', desc:'−23%', nivel:2 },
   { min:1,  pcu:45000, label:'Precio unitario', desc:null,  nivel:1 },
 ];
-const ORIGEN = 'Av. Chivilcoy 4475, CABA, Argentina';
 let cant = 1;
 let misPedidosIds = JSON.parse(sessionStorage.getItem('pist_ids')||'[]');
 let pedidosData = [];
@@ -319,9 +320,8 @@ window.goTab = t => {
 window.limpiarErr = id => document.getElementById(id).style.display='none';
 
 window.onDirChange = () => {
-  const dir = document.getElementById('c-dir').value.trim();
-  const cp = document.getElementById('c-cp').value.trim();
   limpiarErr('e-dir');
+  const dir = document.getElementById('c-dir').value.trim();
   const btnCb=document.getElementById('btn-cb');
   const cbH=document.getElementById('cb-hint');
   if(dir){ btnCb.disabled=false; cbH.textContent='Listo — abre Uber con tu dirección de entrega'; cbH.style.color='#5c6a28'; }
@@ -334,10 +334,7 @@ window.copiarOrigenCA = (btn) => {
   navigator.clipboard.writeText('Av. Chivilcoy 4475, CABA, CP 1419').then(() => {
     btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i> Copiado';
     btn.style.background = '#1a4a7a';
-    setTimeout(() => {
-      btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i> Copiar';
-      btn.style.background = '#004B9C';
-    }, 2000);
+    setTimeout(() => { btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i> Copiar'; btn.style.background = '#004B9C'; }, 2000);
   });
 };
 
@@ -345,10 +342,7 @@ window.copiarOrigen = (btn) => {
   navigator.clipboard.writeText('Av. Chivilcoy 4475, CABA').then(() => {
     btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i> Copiado';
     btn.style.background = 'var(--olive2)';
-    setTimeout(() => {
-      btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i> Copiar';
-      btn.style.background = 'var(--olive)';
-    }, 2000);
+    setTimeout(() => { btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i> Copiar'; btn.style.background = 'var(--olive)'; }, 2000);
   });
 };
 
@@ -369,23 +363,51 @@ function validar(){
 
 window.enviarPedido = async () => {
   if(!validar()) return;
-  const nombre=document.getElementById('c-nombre').value.trim();
-  const tel=document.getElementById('c-tel').value.trim();
-  const email=document.getElementById('c-email').value.trim();
-  const dir=document.getElementById('c-dir').value.trim();
-  const cp=document.getElementById('c-cp').value.trim();
-  const fecha=document.getElementById('c-fecha').value||today();
-  const horario=document.getElementById('c-horario').value;
-  const envio=document.getElementById('c-envio').value;
-  const mensaje=document.getElementById('c-msg').value;
-  const p=getPrecio(cant);
-  const total=cant*p.pcu;
-  const btn=document.getElementById('btn-enviar');
+  const nombre  = document.getElementById('c-nombre').value.trim();
+  const tel     = document.getElementById('c-tel').value.trim();
+  const email   = document.getElementById('c-email').value.trim();
+  const dir     = document.getElementById('c-dir').value.trim();
+  const cp      = document.getElementById('c-cp').value.trim();
+  const fecha   = document.getElementById('c-fecha').value||today();
+  const horario = document.getElementById('c-horario').value;
+  const envio   = document.getElementById('c-envio').value;
+  const mensaje = document.getElementById('c-msg').value;
+  const p       = getPrecio(cant);
+  const total   = cant * p.pcu;
+  const btn     = document.getElementById('btn-enviar');
   btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2" style="font-size:15px"></i> Enviando...';
+
   try {
-    const ref = await addDoc(collection(db,'pedidos'),{nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,fecha,horario,envio,mensaje,estado:'nuevo',hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),creadoEn:serverTimestamp()});
+    const ref = await addDoc(collection(db,'pedidos'),{
+      nombre,tel,email,dir,cp,units:cant,precioUnit:p.pcu,monto:total,
+      fecha,horario,envio,mensaje,estado:'nuevo',
+      hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
+      creadoEn:serverTimestamp()
+    });
     misPedidosIds=[ref.id,...misPedidosIds];
     sessionStorage.setItem('pist_ids',JSON.stringify(misPedidosIds));
+
+    // ── NOTIFICACIÓN POR EMAIL AL ADMIN ──
+    const envioLabel = {uber:'Uber Envíos',correo:'Correo Argentino',retiro:'Retiro en depósito',coordinar:'Coordinar con vendedor'}[envio]||envio;
+    window.emailjs.send('service_07zf6p9','template_65aztnm',{
+      to_email:       'pistacchielo@gmail.com',
+      from_name:      nombre,
+      reply_to:       email,
+      order_id:       ref.id.slice(-6).toUpperCase(),
+      cliente_nombre: nombre,
+      cliente_tel:    tel,
+      cliente_email:  email,
+      botellas:       String(cant),
+      precio_unit:    fmtP(p.pcu),
+      total:          fmtP(total),
+      direccion:      dir + (cp ? ' · CP '+cp : ''),
+      fecha_entrega:  fmtF(fecha),
+      horario:        horario,
+      envio:          envioLabel,
+      notas:          mensaje || '—'
+    }).catch(err => console.warn('EmailJS (no crítico):', err));
+    // ── fin notificación ──
+
     document.getElementById('s-pedido').innerHTML=`
       <div class="confirm-box">
         <div class="confirm-check"><i class="ti ti-check" style="font-size:26px;color:#fff"></i></div>
@@ -405,7 +427,7 @@ window.enviarPedido = async () => {
         <div class="row"><div class="ri"><div class="rn" style="font-weight:700">Total estimado</div></div><div class="rv" style="font-size:16px;color:#7a8c3a">${fmtP(total)}</div></div>
         <div class="row"><div class="ri"><div class="rn">Dirección</div><div class="rs">${dir}${cp?' · CP '+cp:''}</div></div></div>
         <div class="row"><div class="ri"><div class="rn">Entrega</div></div><div class="rv" style="font-size:12px">${fmtF(fecha)} · ${horario}</div></div>
-        <div class="row"><div class="ri"><div class="rn">Método de envío</div></div><div class="rv" style="font-size:12px">${{uber:'Uber Envíos',correo:'Correo Argentino',retiro:'Retiro en depósito',coordinar:'Coordinar con vendedor'}[envio]||envio}</div></div>
+        <div class="row"><div class="ri"><div class="rn">Método de envío</div></div><div class="rv" style="font-size:12px">${envioLabel}</div></div>
       </div>
       <button class="btn btn-g" onclick="goTab('mis')"><i class="ti ti-list" style="font-size:15px"></i> Ver mis pedidos</button>`;
   } catch(e) {
