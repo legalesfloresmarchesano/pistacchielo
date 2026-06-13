@@ -179,14 +179,25 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         </select>
         <div id="e-envio" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Elegí un método de envío</div>
         <label>Forma de pago preferida <span class="req">*</span></label>
-        <select id="c-pago" onchange="limpiarErr('e-pago')">
+        <select id="c-pago" onchange="onPagoChange()">
           <option value="">— Elegí cómo querés pagar —</option>
           <option value="transferencia">Transferencia bancaria</option>
-          <option value="mercadopago">MercadoPago</option>
           <option value="efectivo">Efectivo</option>
           <option value="coordinar">Coordinar con el vendedor</option>
         </select>
         <div id="e-pago" class="err" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Elegí una forma de pago</div>
+        <div id="box-transferencia" style="display:none;background:#eef3dc;border:1px solid #c0cf90;border-radius:10px;padding:14px;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:#5c6a28;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Datos para transferencia</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Banco Ciudad · Caja de ahorro $ · Mariano Flores Marchesano</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:6px">
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:2px">CBU</div><div style="font-size:13px;font-weight:700;color:var(--text)">0290027810000595901543</div></div>
+            <button onclick="copiarDato(this,'0290027810000595901543')" style="background:var(--olive);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:4px"><i class="ti ti-copy" style="font-size:12px"></i> Copiar</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:9px 12px">
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:2px">Alias</div><div style="font-size:13px;font-weight:700;color:var(--text)">CASOS.PADRE.PELAJE</div></div>
+            <button onclick="copiarDato(this,'CASOS.PADRE.PELAJE')" style="background:var(--olive);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:4px"><i class="ti ti-copy" style="font-size:12px"></i> Copiar</button>
+          </div>
+        </div>
         <label>Indicaciones adicionales</label>
         <textarea id="c-msg" rows="2" placeholder="Acceso, timbre, referencia..."></textarea>
       </div>
@@ -327,6 +338,20 @@ window.goTab = t => {
 };
 
 window.limpiarErr = id => document.getElementById(id).style.display='none';
+
+window.onPagoChange = () => {
+  limpiarErr('e-pago');
+  const v = document.getElementById('c-pago').value;
+  document.getElementById('box-transferencia').style.display = v==='transferencia' ? 'block' : 'none';
+};
+
+window.copiarDato = (btn, txt) => {
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i> Copiado';
+    btn.style.background = 'var(--olive2)';
+    setTimeout(() => { btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i> Copiar'; btn.style.background = 'var(--olive)'; }, 2000);
+  });
+};
 
 window.onDirChange = () => {
   limpiarErr('e-dir');
