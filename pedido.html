@@ -425,7 +425,7 @@ window.enviarPedido = async () => {
 
     // ── NOTIFICACIÓN POR EMAIL AL ADMIN ──
     const envioLabel = {uber:'Uber Envíos',correo:'Correo Argentino',retiro:'Retiro en depósito',coordinar:'Coordinar con vendedor'}[envio]||envio;
-    window.emailjs.send('service_07zf6p9','template_65aztnm',{
+   window.emailjs.send('service_07zf6p9', 'template_neaimmr', {
       to_email:       'pistacchielo@gmail.com',
       from_name:      nombre,
       reply_to:       email,
