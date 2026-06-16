@@ -15,26 +15,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--olive);border-radius:50%;animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-
-/* LANDING */
 #landing{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:var(--bg);text-align:center}
-.landing-brand{font-family:'Dancing Script',cursive;font-size:56px;color:var(--black);line-height:1;margin-bottom:6px}
-.landing-sub{font-size:12px;letter-spacing:2px;color:var(--gold2);text-transform:uppercase;font-weight:600;margin-bottom:40px}
 .landing-btn{width:100%;max-width:320px;padding:16px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:none;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s}
 .landing-btn:active{opacity:.85}
 .btn-admin{background:var(--black);color:var(--bg)}
 .btn-cliente{background:var(--olive);color:var(--white)}
 .btn-vendedor{background:var(--white);color:var(--black);border:1.5px solid var(--border)}
-.landing-footer{font-size:11px;color:var(--muted);margin-top:24px;letter-spacing:.5px}
-
-/* LOGIN */
 #login-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
-.login-logo{font-family:'Dancing Script',cursive;font-size:44px;color:var(--black);margin-bottom:4px}
-.login-eyebrow{font-size:10px;letter-spacing:2px;color:var(--gold2);text-transform:uppercase;margin-bottom:28px;font-weight:600}
 .login-card{background:var(--white);border-radius:14px;padding:24px;width:100%;max-width:360px;border:1px solid var(--border)}
 .back-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px;margin-bottom:16px;padding:0}
-
-/* TOPBAR */
 .topbar{background:var(--black);padding:12px 16px 14px;display:flex;align-items:center;gap:10px}
 .lc{width:36px;height:36px;background:var(--olive);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .lc i{font-size:18px;color:var(--white)}
@@ -42,14 +31,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .role{font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase}
 .notif-btn{background:rgba(255,255,255,0.12);border:none;border-radius:20px;padding:5px 10px;color:var(--bg);cursor:pointer;font-size:12px;display:flex;align-items:center;gap:4px}
 #notif-badge{background:#c0392b;color:#fff;border-radius:20px;padding:1px 6px;font-size:11px;font-weight:700}
-
-/* NAV */
 .nav{display:flex;overflow-x:auto;background:var(--white);border-bottom:1px solid var(--border);scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
 .nav-btn{flex:none;padding:10px 8px;font-size:11px;font-weight:500;color:var(--muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:3px}
 .nav-btn.active{color:var(--olive2);border-bottom-color:var(--olive);font-weight:700}
-
-/* CONTENT */
 .content{padding:14px;padding-bottom:30px}
 .section{display:none}.section.active{display:block}
 .card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:14px;margin-bottom:10px}
@@ -102,6 +87,13 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
 .precio-opt input[type=radio]:checked + label{background:var(--olive);color:var(--white);border-color:var(--olive)}
 .stat-box{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:14px;margin-bottom:10px}
 .stat-title{font-size:11px;font-weight:700;color:var(--gold2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+
+/* MODAL RE-LOGIN */
+#modal-relogin{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;padding:24px}
+#modal-relogin.visible{display:flex}
+.modal-box{background:var(--white);border-radius:16px;padding:24px;width:100%;max-width:340px;border:1px solid var(--border)}
+.modal-title{font-size:15px;font-weight:700;color:var(--black);margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -133,6 +125,21 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
   </div>
 </div>
 
+<!-- MODAL RE-LOGIN -->
+<div id="modal-relogin">
+  <div class="modal-box">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="width:48px;height:48px;background:var(--olive);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><i class="ti ti-shield-check" style="font-size:22px;color:#fff"></i></div>
+      <div class="modal-title">Confirmá tu identidad</div>
+      <div class="modal-sub">Ingresá tu contraseña de admin para continuar</div>
+    </div>
+    <label>Contraseña</label>
+    <input type="password" id="relogin-pass" placeholder="Tu contraseña de admin">
+    <div id="relogin-error" class="err-msg" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Contraseña incorrecta</div>
+    <button class="btn btn-g" onclick="confirmarRelogin()" style="margin-top:4px"><i class="ti ti-login"></i> Confirmar</button>
+  </div>
+</div>
+
 <!-- ADMIN APP -->
 <div id="admin-app" class="app" style="display:none">
   <div class="topbar">
@@ -155,8 +162,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <button class="nav-btn" id="nb-alertas" onclick="goTab('alertas')"><i class="ti ti-bell"></i> Alertas</button>
   </div>
   <div class="content">
-
-    <!-- INICIO -->
     <div class="section active" id="s-inicio">
       <div id="inicio-alertas"></div>
       <div class="g2">
@@ -178,8 +183,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="inicio-movs"><div class="empty">Sin movimientos</div></div>
       </div>
     </div>
-
-    <!-- PEDIDOS -->
     <div class="section" id="s-pedidos">
       <div id="pedidos-banner"></div>
       <div class="card">
@@ -193,8 +196,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
       </div>
       <div id="pedidos-list"></div>
     </div>
-
-    <!-- STOCK -->
     <div class="section" id="s-stock">
       <div class="card">
         <div class="card-hd"><i class="ti ti-package"></i> Ajustar stock</div>
@@ -214,8 +215,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="stock-movs"><div class="empty">Sin movimientos</div></div>
       </div>
     </div>
-
-    <!-- OPEN BOTTLES -->
     <div class="section" id="s-open">
       <div class="card">
         <div class="card-hd"><i class="ti ti-gift"></i> Registrar open bottle</div>
@@ -240,8 +239,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="open-list"><div class="empty">Sin registros</div></div>
       </div>
     </div>
-
-    <!-- VENTAS -->
     <div class="section" id="s-ventas">
       <div class="card">
         <div class="card-hd"><i class="ti ti-chart-bar"></i> Ventas por mes ($)</div>
@@ -265,8 +262,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="ventas-list"><div class="empty">Sin ventas</div></div>
       </div>
     </div>
-
-    <!-- COBROS -->
     <div class="section" id="s-cobros">
       <div class="g2">
         <div class="metric"><div class="mv rc" id="cobros-pend">$0</div><div class="ml">Pendiente</div></div>
@@ -274,8 +269,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
       </div>
       <div id="cobros-list"><div class="empty">Sin datos</div></div>
     </div>
-
-    <!-- GASTOS -->
     <div class="section" id="s-gastos">
       <div class="card">
         <div class="card-hd"><i class="ti ti-plus"></i> Cargar gasto</div>
@@ -301,8 +294,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="gastos-list"><div class="empty">Sin gastos</div></div>
       </div>
     </div>
-
-    <!-- VENDEDORES -->
     <div class="section" id="s-vendedores">
       <div class="card">
         <div class="card-hd"><i class="ti ti-user-plus"></i> Crear vendedor</div>
@@ -323,32 +314,13 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="vendedores-list"><div class="empty">Sin vendedores</div></div>
       </div>
     </div>
-
-    <!-- STATS -->
     <div class="section" id="s-stats">
-      <div class="stat-box">
-        <div class="stat-title"><i class="ti ti-trending-up"></i> Ventas mensuales ($)</div>
-        <div id="stat-ventas"><div class="empty">Sin datos</div></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-title"><i class="ti ti-package"></i> Botellas vendidas por mes</div>
-        <div id="stat-bots"><div class="empty">Sin datos</div></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-title"><i class="ti ti-receipt"></i> Gastos por categoría</div>
-        <div id="stat-gastos"><div class="empty">Sin datos</div></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-title"><i class="ti ti-gift"></i> Open bottles por mes</div>
-        <div id="stat-open"><div class="empty">Sin datos</div></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-title"><i class="ti ti-coin"></i> Comisiones pagadas vs pendientes</div>
-        <div id="stat-comisiones"><div class="empty">Sin datos</div></div>
-      </div>
+      <div class="stat-box"><div class="stat-title"><i class="ti ti-trending-up"></i> Ventas mensuales ($)</div><div id="stat-ventas"><div class="empty">Sin datos</div></div></div>
+      <div class="stat-box"><div class="stat-title"><i class="ti ti-package"></i> Botellas vendidas por mes</div><div id="stat-bots"><div class="empty">Sin datos</div></div></div>
+      <div class="stat-box"><div class="stat-title"><i class="ti ti-receipt"></i> Gastos por categoría</div><div id="stat-gastos"><div class="empty">Sin datos</div></div></div>
+      <div class="stat-box"><div class="stat-title"><i class="ti ti-gift"></i> Open bottles por mes</div><div id="stat-open"><div class="empty">Sin datos</div></div></div>
+      <div class="stat-box"><div class="stat-title"><i class="ti ti-coin"></i> Comisiones pagadas vs pendientes</div><div id="stat-comisiones"><div class="empty">Sin datos</div></div></div>
     </div>
-
-    <!-- CLIENTES -->
     <div class="section" id="s-clientes">
       <div class="card">
         <div class="card-hd"><i class="ti ti-address-book"></i> Base de clientes</div>
@@ -360,12 +332,9 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="clientes-list"><div class="empty">Sin clientes</div></div>
       </div>
     </div>
-
-    <!-- ALERTAS -->
     <div class="section" id="s-alertas">
       <div id="alertas-content"><div class="empty">Sin alertas activas</div></div>
     </div>
-
   </div>
 </div>
 
@@ -382,7 +351,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <button class="nav-btn" id="vnb-comisiones" onclick="vendGoTab('comisiones')"><i class="ti ti-coin"></i> Comisiones</button>
   </div>
   <div class="content">
-
     <div class="section active" id="vs-nuevo">
       <div class="card">
         <div class="card-hd"><i class="ti ti-user"></i> Datos del cliente final</div>
@@ -410,11 +378,9 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <button class="btn btn-g" onclick="vendedorAddPedido()"><i class="ti ti-send"></i> Enviar pedido</button>
       </div>
     </div>
-
     <div class="section" id="vs-mispedidos">
       <div id="vend-pedidos-list"><div class="empty">Sin pedidos</div></div>
     </div>
-
     <div class="section" id="vs-comisiones">
       <div class="g2" style="margin-bottom:10px">
         <div class="metric"><div class="mv pc" id="vd-pend">$0</div><div class="ml">Pendiente de cobro</div></div>
@@ -425,7 +391,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <div id="vend-comisiones-list"><div class="empty">Sin comisiones</div></div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -458,6 +423,7 @@ const isThisMonth = f => { const d=new Date(f+'T00:00:00'),n=new Date(); return 
 let S = { stockInicial:0, pedidos:[], ventas:[], gastos:[], movs:[], opens:[], vendedores:[], comisiones:[], currentUser:null, userRole:null };
 let unsubs = [];
 let loginMode = 'admin';
+let adminEmailParaRelogin = '';
 
 // ── AUTH ──
 onAuthStateChanged(auth, async user => {
@@ -466,10 +432,10 @@ onAuthStateChanged(auth, async user => {
     S.currentUser = user;
     if(ADMINS.includes(user.email)) {
       S.userRole = 'admin';
+      adminEmailParaRelogin = user.email;
       showApp('admin');
       startAdminListeners();
     } else {
-      // verificar si es vendedor
       const vSnap = await getDoc(doc(db,'vendedores',user.uid));
       if(vSnap.exists()) {
         S.userRole = 'vendedor';
@@ -489,9 +455,7 @@ onAuthStateChanged(auth, async user => {
 
 function showApp(which) {
   ['landing','login-screen','admin-app','vendedor-app'].forEach(id => {
-    const el = document.getElementById(id);
-    el.style.display = 'none';
-    if(id==='landing'||id==='login-screen') el.style.display='none';
+    document.getElementById(id).style.display = 'none';
   });
   if(which==='landing') document.getElementById('landing').style.display='flex';
   else if(which==='login') document.getElementById('login-screen').style.display='flex';
@@ -516,6 +480,20 @@ window.doLogin = async () => {
 };
 window.doLogout = () => signOut(auth);
 
+// ── MODAL RE-LOGIN ──
+window.confirmarRelogin = async () => {
+  const pass = document.getElementById('relogin-pass').value;
+  const errEl = document.getElementById('relogin-error');
+  errEl.style.display = 'none';
+  try {
+    await signInWithEmailAndPassword(auth, adminEmailParaRelogin, pass);
+    document.getElementById('modal-relogin').classList.remove('visible');
+    document.getElementById('relogin-pass').value = '';
+  } catch(e) {
+    errEl.style.display = 'flex';
+  }
+};
+
 // ── ADMIN LISTENERS ──
 function startAdminListeners() {
   document.getElementById('user-role').textContent = S.currentUser.email.includes('nico') ? 'Nicolás · España' : 'Mariano · Argentina';
@@ -530,7 +508,6 @@ function startAdminListeners() {
   unsubs.push(onSnapshot(query(collection(db,'comisiones'),orderBy('fecha','desc')), snap => {
     S.comisiones=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderComisiones(); renderResumen(); renderInicio(); renderStats();
-    // limpiar comisiones pagadas > 7 días
     S.comisiones.forEach(async c => {
       if(c.pagada && c.fechaPago) {
         const dias = Math.floor((new Date()-new Date(c.fechaPago+'T00:00:00'))/(1000*60*60*24));
@@ -569,7 +546,6 @@ window.actualizarStock = async () => {
   alert('Stock actualizado: '+v+' botellas');
 };
 
-// ── OPEN BOTTLES ──
 window.addOpenBottle = async () => {
   const c = document.getElementById('ob-cliente').value.trim();
   const u = parseInt(document.getElementById('ob-units').value)||0;
@@ -583,7 +559,6 @@ window.addOpenBottle = async () => {
   ['ob-cliente','ob-units','ob-notas'].forEach(id=>document.getElementById(id).value='');
 };
 
-// ── VENTAS ──
 window.addVenta = async () => {
   const c=document.getElementById('v-cliente').value.trim();
   const u=parseInt(document.getElementById('v-units').value)||0;
@@ -604,7 +579,6 @@ window.marcarCobrado = async id => {
   await updateDoc(doc(db,'ventas',id),{cobrado:true,fechaCobro:today()});
 };
 
-// ── GASTOS ──
 window.addGasto = async () => {
   const d=document.getElementById('g-desc').value.trim();
   const m=parseFloat(document.getElementById('g-monto').value)||0;
@@ -615,7 +589,6 @@ window.addGasto = async () => {
   document.getElementById('g-desc').value='';document.getElementById('g-monto').value='';
 };
 
-// ── PEDIDOS ADMIN ──
 window.confirmarPedido = async id => await updateDoc(doc(db,'pedidos',id),{estado:'confirmado'});
 window.setPrecioPedido = async id => {
   const p=S.pedidos.find(x=>x.id===id);
@@ -637,7 +610,7 @@ window.eliminarPedido = async id => {
   await deleteDoc(doc(db,'pedidos',id));
 };
 
-// ── VENDEDORES ──
+// ── CREAR VENDEDOR — SIN PROMPT ──
 window.crearVendedor = async () => {
   const nombre=document.getElementById('vend-nombre').value.trim();
   const email=document.getElementById('vend-email').value.trim();
@@ -648,21 +621,19 @@ window.crearVendedor = async () => {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await setDoc(doc(db,'vendedores',cred.user.uid),{nombre,email,tel,activo:true,creadoEn:serverTimestamp()});
     ['vend-nombre','vend-email','vend-pass','vend-tel'].forEach(id=>document.getElementById(id).value='');
-    alert('Vendedor creado: '+nombre);
-    // re-login como admin
+    // Cerrar sesión y mostrar modal de re-login (sin prompt feo)
     await signOut(auth);
-    await signInWithEmailAndPassword(auth, S.currentUser.email, prompt('Ingresá tu contraseña de admin para continuar:'));
+    document.getElementById('modal-relogin').classList.add('visible');
+    setTimeout(() => document.getElementById('relogin-pass').focus(), 100);
   } catch(e) { alert('Error: '+e.message); }
 };
 
-// ── COMISIONES ──
 window.pagarComision = async id => {
   const c=S.comisiones.find(x=>x.id===id);
   if(!c||!confirm('¿Marcar como pagada la comisión de '+fmt(c.monto)+' a '+c.vendedorNombre+'?'))return;
   await updateDoc(doc(db,'comisiones',id),{pagada:true,fechaPago:today()});
 };
 
-// ── VENDEDOR — NUEVO PEDIDO ──
 window.calcComision = () => {
   const units = parseInt(document.getElementById('vc-units').value)||0;
   const radio = document.querySelector('input[name="vprecio"]:checked');
@@ -708,7 +679,6 @@ window.vendedorAddPedido = async () => {
   alert('Pedido enviado. Comisión generada: '+fmt(comisionMonto));
 };
 
-// ── NAVEGACIÓN ──
 window.goTab = tab => {
   document.querySelectorAll('#admin-app .section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('#admin-app .nav-btn').forEach(b=>b.classList.remove('active'));
@@ -734,14 +704,12 @@ window.vendGoTab = tab => {
   document.getElementById('vnb-'+tab).classList.add('active');
 };
 
-// ── NOTIF ──
 function updateNotif(){
   const n=S.pedidos.filter(p=>p.estado==='nuevo').length;
   const el=document.getElementById('notif-badge');
   if(n>0){el.textContent=n;el.style.display='inline';}else el.style.display='none';
 }
 
-// ── RENDERS ADMIN ──
 function renderInicio(){
   const sa=stockActual();const pct=S.stockInicial>0?Math.round(sa/S.stockInicial*100):0;
   document.getElementById('d-stock').textContent=sa;
@@ -878,25 +846,20 @@ function renderComisiones(){
 }
 
 function renderStats(){
-  // Ventas por mes
   const vm={};S.ventas.forEach(v=>{const k=mesKey(v.fecha);vm[k]=(vm[k]||0)+v.monto;});
   renderBarChart('stat-ventas',vm,k=>fmt(vm[k]),'var(--gold)');
-  // Botellas por mes
   const bm={};S.ventas.forEach(v=>{const k=mesKey(v.fecha);bm[k]=(bm[k]||0)+v.units;});
   renderBarChart('stat-bots',bm,k=>bm[k]+' bot.','var(--olive)');
-  // Gastos por categoría
   const gcat={};S.gastos.forEach(g=>{gcat[g.cat]=(gcat[g.cat]||0)+g.monto;});
   renderBarChart('stat-gastos',gcat,k=>fmt(gcat[k]),'#b84040');
-  // Open bottles por mes
   const om={};S.opens.forEach(o=>{const k=mesKey(o.fecha);om[k]=(om[k]||0)+o.units;});
   renderBarChart('stat-open',om,k=>om[k]+' bot.','var(--gold2)');
-  // Comisiones
   const cp=S.comisiones.filter(c=>!c.pagada).reduce((a,c)=>a+c.monto,0);
   const cc=S.comisiones.filter(c=>c.pagada).reduce((a,c)=>a+c.monto,0);
   const el=document.getElementById('stat-comisiones');
   if(!S.comisiones.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
   el.innerHTML=`
-    <div class="bar-row"><div class="bar-lbl" style="width:60px;font-size:11px">Pendiente</div><div class="bar-track"><div class="bar-fill" style="width:${cp+cc>0?Math.round(cp/(cp+cc)*100):0}%;background:var(--pc,#6d28d9)"></div></div><div class="bar-val">${fmt(cp)}</div></div>
+    <div class="bar-row"><div class="bar-lbl" style="width:60px;font-size:11px">Pendiente</div><div class="bar-track"><div class="bar-fill" style="width:${cp+cc>0?Math.round(cp/(cp+cc)*100):0}%;background:#6d28d9"></div></div><div class="bar-val">${fmt(cp)}</div></div>
     <div class="bar-row"><div class="bar-lbl" style="width:60px;font-size:11px">Pagado</div><div class="bar-track"><div class="bar-fill" style="width:${cp+cc>0?Math.round(cc/(cp+cc)*100):0}%;background:var(--olive)"></div></div><div class="bar-val">${fmt(cc)}</div></div>`;
 }
 
@@ -954,7 +917,6 @@ function renderAlertas(){
   document.getElementById('alertas-content').innerHTML=html;
 }
 
-// ── RENDERS VENDEDOR ──
 function renderVendPedidos(){
   const el=document.getElementById('vend-pedidos-list');
   if(!S.vendPedidos||!S.vendPedidos.length){el.innerHTML='<div class="empty">Sin pedidos enviados</div>';return;}
