@@ -754,7 +754,8 @@ function renderPedidos(){
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         ${p.estado==='nuevo'?`<button class="btn btn-g btn-sm" onclick="confirmarPedido('${p.id}')"><i class="ti ti-check" style="font-size:12px"></i> Confirmar</button>`:''}
         ${p.estado==='confirmado'?`<button class="btn btn-g btn-sm" onclick="setPrecioPedido('${p.id}')"><i class="ti ti-currency-dollar" style="font-size:12px"></i> Precio</button><button class="btn btn-olive btn-sm" onclick="marcarEntregado('${p.id}')"><i class="ti ti-truck" style="font-size:12px"></i> Entregado</button>`:''}
-        ${p.estado==='entregado'?`<span class="badge bg-b"><i class="ti ti-check" style="font-size:11px"></i> Entregado</span><button class="btn btn-ghost btn-sm" style="color:#b84040;border-color:#f0a0a0;margin-left:4px" onclick="eliminarPedido('${p.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Eliminar</button>`:''}
+        ${p.estado==='entregado'?`<span class="badge bg-b"><i class="ti ti-check" style="font-size:11px"></i> Entregado</span>`:''}
+        <button class="btn btn-ghost btn-sm" style="color:#b84040;border-color:#f0a0a0" onclick="eliminarPedido('${p.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Eliminar</button>
       </div>
     </div>`).join('');
 }
