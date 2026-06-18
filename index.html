@@ -385,16 +385,24 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
       <div class="card">
         <div class="card-hd"><i class="ti ti-package"></i> Detalle de la venta</div>
         <label>Cantidad de botellas</label><input type="number" id="vc-units" placeholder="0" min="1" oninput="calcComision()">
-        <label>Precio de venta</label>
+        <label>Precio de venta (base)</label>
         <div class="precio-opt">
           <input type="radio" name="vprecio" id="vp1" value="34500" onchange="calcComision()">
           <label for="vp1">$34.500<br><span style="font-size:10px;font-weight:400">1 caja</span></label>
           <input type="radio" name="vprecio" id="vp2" value="29500" onchange="calcComision()">
           <label for="vp2">$29.500<br><span style="font-size:10px;font-weight:400">4+ cajas</span></label>
         </div>
+        <label>Forma de pago del cliente</label>
+        <div class="precio-opt">
+          <input type="radio" name="vmetodo" id="vm1" value="efectivo" checked onchange="calcComision()">
+          <label for="vm1"><i class="ti ti-cash" style="font-size:14px"></i><br><span style="font-size:11px">Efectivo</span></label>
+          <input type="radio" name="vmetodo" id="vm2" value="transferencia" onchange="calcComision()">
+          <label for="vm2"><i class="ti ti-building-bank" style="font-size:14px"></i><br><span style="font-size:11px">Transferencia (+10,5%)</span></label>
+        </div>
         <div id="comision-preview" style="display:none;background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:10px;font-size:13px">
-          <div style="display:flex;justify-content:space-between"><span>Total venta:</span><strong id="cp-total">$0</strong></div>
-          <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Tu comisión (<span id="cp-pct">0</span>%):</span><strong id="cp-comision" style="color:var(--olive2)">$0</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Precio unitario a cobrar:</span><strong id="cp-preciounit">$0</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Total a cobrar:</span><strong id="cp-total">$0</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Tu comisión (<span id="cp-pct">0</span>% sobre precio base):</span><strong id="cp-comision" style="color:var(--olive2)">$0</strong></div>
         </div>
         <label>Fecha</label><input type="date" id="vc-fecha">
         <label>Notas</label><input id="vc-notas" placeholder="Observaciones...">
@@ -746,12 +754,17 @@ window.pagarComision = async id => {
 window.calcComision = () => {
   const units = parseInt(document.getElementById('vc-units').value)||0;
   const radio = document.querySelector('input[name="vprecio"]:checked');
+  const metodoRadio = document.querySelector('input[name="vmetodo"]:checked');
   if(!units||!radio){document.getElementById('comision-preview').style.display='none';return;}
-  const precioUnit = parseFloat(radio.value);
-  const total = units * precioUnit;
-  const pct = precioUnit===29500 ? 10 : 15;
-  const comision = total * pct / 100;
-  document.getElementById('cp-total').textContent = fmt(total);
+  const precioBase = parseFloat(radio.value);
+  const metodo = metodoRadio ? metodoRadio.value : 'efectivo';
+  const precioUnitCobrar = metodo==='transferencia' ? Math.round(precioBase*1.105) : precioBase;
+  const totalCobrar = units * precioUnitCobrar;
+  const totalBase = units * precioBase;
+  const pct = precioBase===29500 ? 10 : 15;
+  const comision = totalBase * pct / 100;
+  document.getElementById('cp-preciounit').textContent = fmt(precioUnitCobrar);
+  document.getElementById('cp-total').textContent = fmt(totalCobrar);
   document.getElementById('cp-pct').textContent = pct;
   document.getElementById('cp-comision').textContent = fmt(comision);
   document.getElementById('comision-preview').style.display='block';
@@ -764,28 +777,33 @@ window.vendedorAddPedido = async () => {
   const dir=document.getElementById('vc-dir').value.trim();
   const units=parseInt(document.getElementById('vc-units').value)||0;
   const radio=document.querySelector('input[name="vprecio"]:checked');
+  const metodoRadio=document.querySelector('input[name="vmetodo"]:checked');
   const fecha=document.getElementById('vc-fecha').value||today();
   const notas=document.getElementById('vc-notas').value;
   if(!nombre||!cuit||!tel||!dir||!units||!radio){alert('Completá todos los campos');return;}
-  const precioUnit=parseFloat(radio.value);
+  const precioBase=parseFloat(radio.value);
+  const metodoPago=metodoRadio?metodoRadio.value:'efectivo';
+  const precioUnit=metodoPago==='transferencia'?Math.round(precioBase*1.105):precioBase;
   const total=units*precioUnit;
-  const pct=precioUnit===29500?10:15;
-  const comisionMonto=total*pct/100;
+  const totalBase=units*precioBase;
+  const pct=precioBase===29500?10:15;
+  const comisionMonto=totalBase*pct/100;
   const pedidoRef = await addDoc(collection(db,'pedidos'),{
-    nombre,cuit,tel,dir,units,precioUnit,monto:total,fecha,notas,
+    nombre,cuit,tel,dir,units,precioUnit,precioBase,metodoPago,monto:total,fecha,notas,
     estado:'nuevo',vendedorId:S.currentUser.uid,vendedorNombre:S.currentVendedor.nombre,
     hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
     creadoEn:serverTimestamp()
   });
   await addDoc(collection(db,'comisiones'),{
     pedidoId:pedidoRef.id,vendedorId:S.currentUser.uid,vendedorNombre:S.currentVendedor.nombre,
-    clienteNombre:nombre,units,precioUnit,totalVenta:total,pct,monto:comisionMonto,
+    clienteNombre:nombre,units,precioUnit:precioBase,totalVenta:totalBase,pct,monto:comisionMonto,
     fecha,pagada:false,creadoEn:serverTimestamp()
   });
   ['vc-nombre','vc-cuit','vc-tel','vc-dir','vc-units','vc-notas'].forEach(id=>document.getElementById(id).value='');
   document.querySelectorAll('input[name="vprecio"]').forEach(r=>r.checked=false);
+  document.getElementById('vm1').checked=true;
   document.getElementById('comision-preview').style.display='none';
-  alert('Pedido enviado. Comisión generada: '+fmt(comisionMonto));
+  alert('Pedido enviado. Total a cobrar: '+fmt(total)+' ('+(metodoPago==='efectivo'?'Efectivo':'Transferencia')+')\nComisión generada: '+fmt(comisionMonto));
 };
 
 window.goTab = tab => {
@@ -854,7 +872,7 @@ function renderPedidos(){
         <span class="badge ${eB[p.estado]||'bg-gr'}">${eL[p.estado]||p.estado}</span>
       </div>
       <div style="background:var(--bg2);border-radius:8px;padding:8px;margin-bottom:8px;font-size:12px;display:flex;flex-direction:column;gap:4px">
-        <div><i class="ti ti-package" style="font-size:12px;color:var(--muted)"></i> <strong>${p.units} botellas</strong>${p.monto?' · '+fmt(p.monto):''}</div>
+        <div><i class="ti ti-package" style="font-size:12px;color:var(--muted)"></i> <strong>${p.units} botellas</strong>${p.monto?' · '+fmt(p.monto):''}${p.metodoPago?' · <span style="color:var(--olive2);font-weight:600">'+(p.metodoPago==='efectivo'?'Efectivo':'Transferencia')+'</span>':''}</div>
         <div><i class="ti ti-map-pin" style="font-size:12px;color:var(--muted)"></i> ${p.dir||'—'}${p.cp?' · CP '+p.cp:''}</div>
         <div><i class="ti ti-calendar" style="font-size:12px;color:var(--muted)"></i> ${fmtF(p.fecha)} ${p.horario?'· '+p.horario:''}</div>
         ${p.envio?`<div><i class="ti ti-truck" style="font-size:12px;color:var(--olive)"></i> <strong style="color:var(--olive2)">${envioLabel[p.envio]||p.envio}</strong></div>`:''}
@@ -1039,7 +1057,7 @@ function renderVendPedidos(){
   el.innerHTML=S.vendPedidos.map(p=>`
     <div class="pedido-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <div><div style="font-weight:600;font-size:14px">${p.nombre}</div><div style="font-size:12px;color:var(--muted)">${p.cuit||''} · ${p.units} bot. · ${fmt(p.monto||0)}</div><div style="font-size:11px;color:var(--muted)">${fmtF(p.fecha)}</div></div>
+        <div><div style="font-weight:600;font-size:14px">${p.nombre}</div><div style="font-size:12px;color:var(--muted)">${p.cuit||''} · ${p.units} bot. · ${fmt(p.monto||0)}${p.metodoPago?' · '+(p.metodoPago==='efectivo'?'Efectivo':'Transferencia'):''}</div><div style="font-size:11px;color:var(--muted)">${fmtF(p.fecha)}</div></div>
         <span class="badge ${eB[p.estado]||'bg-gr'}">${eL[p.estado]||p.estado}</span>
       </div>
     </div>`).join('');
