@@ -643,6 +643,12 @@ window.editarVendedor = async id => {
   await updateDoc(doc(db,'vendedores',id),{nombre:nuevoNombre.trim()||v.nombre,tel:nuevoTel.trim()});
 };
 
+window.eliminarMovimiento = async id => {
+  const m=S.movs.find(x=>x.id===id);
+  if(!m||!confirm('¿Eliminar este movimiento del historial?\n\n"'+m.desc+'"\n\nNota: esto solo borra el registro visual, no afecta el stock actual (que se calcula con ventas y opens).'))return;
+  await deleteDoc(doc(db,'movimientos',id));
+};
+
 window.eliminarVendedor = async id => {
   const v=S.vendedores.find(x=>x.id===id);
   if(!v)return;
@@ -825,7 +831,7 @@ function renderStock(){
   document.getElementById('stock-disp-lbl').textContent=stockActual();
   const movs=document.getElementById('stock-movs');
   if(!S.movs.length){movs.innerHTML='<div class="empty">Sin movimientos</div>';return;}
-  movs.innerHTML=S.movs.slice(0,20).map(m=>`<div class="row"><div class="ri"><div class="rn">${m.desc}</div><div class="rs">${fmtF(m.fecha)}</div></div><div class="rv rc">-${m.tipo==='ajuste'?0:m.units}</div></div>`).join('');
+  movs.innerHTML=S.movs.slice(0,20).map(m=>`<div class="row"><div class="ri"><div class="rn">${m.desc}</div><div class="rs">${fmtF(m.fecha)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="rv rc">-${m.tipo==='ajuste'?0:m.units}</div><button onclick="eliminarMovimiento('${m.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');
   const byM={};S.ventas.forEach(v=>{const k=mesKey(v.fecha);byM[k]=(byM[k]||0)+v.units;});
   S.opens.forEach(o=>{const k=mesKey(o.fecha);byM[k]=(byM[k]||0)+o.units;});
   const keys=Object.keys(byM);const el=document.getElementById('stock-chart');
