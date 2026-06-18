@@ -604,6 +604,18 @@ window.marcarEntregado = async id => {
   await addDoc(collection(db,'ventas'),{cliente:p.nombre,contacto:p.tel||'',units:p.units,monto:p.monto||0,fecha:today(),fechaVenc:fv.toISOString().split('T')[0],cond:30,cobrado:false,pedidoId:id,creadoEn:serverTimestamp()});
   await addDoc(collection(db,'movimientos'),{tipo:'venta',desc:p.nombre+' — '+p.units+' bot.',units:p.units,fecha:today(),monto:p.monto||0,creadoEn:serverTimestamp()});
 };
+window.eliminarVenta = async id => {
+  const v=S.ventas.find(x=>x.id===id);
+  if(!v||!confirm('¿Eliminar venta de '+v.cliente+' ('+fmt(v.monto)+')?'))return;
+  await deleteDoc(doc(db,'ventas',id));
+};
+
+window.eliminarComision = async id => {
+  const c=S.comisiones.find(x=>x.id===id);
+  if(!c||!confirm('¿Eliminar comisión de '+fmt(c.monto)+' de '+c.vendedorNombre+'?'))return;
+  await deleteDoc(doc(db,'comisiones',id));
+};
+
 window.eliminarPedido = async id => {
   const p=S.pedidos.find(x=>x.id===id);
   if(!p||!confirm('¿Eliminar pedido de '+p.nombre+'?'))return;
@@ -786,7 +798,7 @@ function renderVentas(){
   else{const maxV=Math.max(...Object.values(byM),1);el.innerHTML=keys.map(k=>`<div class="bar-row"><div class="bar-lbl">${k.split(' ')[0]}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(byM[k]/maxV*100)}%;background:var(--gold)"></div></div><div class="bar-val">${fmt(byM[k])}</div></div>`).join('');}
   const lEl=document.getElementById('ventas-list');
   if(!S.ventas.length){lEl.innerHTML='<div class="empty">Sin ventas</div>';return;}
-  lEl.innerHTML=S.ventas.map(v=>`<div class="row"><div class="ri"><div class="rn">${v.cliente}</div><div class="rs">${fmtF(v.fecha)} · ${v.units} bot.</div></div><div><div class="rv gc">${fmt(v.monto)}</div><div style="font-size:11px;text-align:right;margin-top:2px">${v.cobrado?'<span class="badge bg-b">Cobrado</span>':'<span class="badge bg-a">Pendiente</span>'}</div></div></div>`).join('');
+  lEl.innerHTML=S.ventas.map(v=>`<div class="row"><div class="ri"><div class="rn">${v.cliente}</div><div class="rs">${fmtF(v.fecha)} · ${v.units} bot.</div></div><div style="display:flex;align-items:center;gap:8px"><div><div class="rv gc">${fmt(v.monto)}</div><div style="font-size:11px;text-align:right;margin-top:2px">${v.cobrado?'<span class="badge bg-b">Cobrado</span>':'<span class="badge bg-a">Pendiente</span>'}</div></div><button onclick="eliminarVenta('${v.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');
 }
 
 function renderCobros(){
@@ -800,7 +812,7 @@ function renderCobros(){
       return`<div class="pedido-card ${dias>0?'nuevo':''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><div style="font-weight:600;font-size:14px">${v.cliente}</div><div style="font-size:12px;color:var(--muted)">${v.units} bot. · vence ${fmtF(v.fechaVenc)}</div>${dias>0?`<div style="font-size:11px;color:#b84040">Vencido hace ${dias} días</div>`:''}</div><div class="rv rc">${fmt(v.monto)}</div></div><button class="btn btn-g" style="margin-top:8px;padding:9px" onclick="marcarCobrado('${v.id}')"><i class="ti ti-check"></i> Cobrado</button></div>`;
     }).join('');
   }
-  if(cob.length){html+='<div class="sep" style="margin-top:12px">Cobrados</div>';html+=cob.map(v=>`<div class="row"><div class="ri"><div class="rn">${v.cliente}</div><div class="rs">Cobrado ${fmtF(v.fechaCobro)}</div></div><div class="rv gc">${fmt(v.monto)}</div></div>`).join('');}
+  if(cob.length){html+='<div class="sep" style="margin-top:12px">Cobrados</div>';html+=cob.map(v=>`<div class="row"><div class="ri"><div class="rn">${v.cliente}</div><div class="rs">Cobrado ${fmtF(v.fechaCobro)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="rv gc">${fmt(v.monto)}</div><button onclick="eliminarVenta('${v.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');}
   if(!html)html='<div class="empty">Sin cobros</div>';
   el.innerHTML=html;
 }
@@ -840,7 +852,7 @@ function renderComisiones(){
     <div class="pedido-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
         <div><div style="font-weight:600;font-size:14px">${c.vendedorNombre}</div><div style="font-size:12px;color:var(--muted)">${c.clienteNombre} · ${c.units} bot. · ${fmt(c.precioUnit)}/u</div><div style="font-size:11px;color:var(--muted)">${fmtF(c.fecha)} · ${c.pct}% sobre ${fmt(c.totalVenta)}</div></div>
-        <div class="rv pc">${fmt(c.monto)}</div>
+        <div style="display:flex;align-items:center;gap:8px"><div class="rv pc">${fmt(c.monto)}</div><button onclick="eliminarComision('${c.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div>
       </div>
       <button class="btn btn-olive btn-sm" onclick="pagarComision('${c.id}')"><i class="ti ti-check" style="font-size:12px"></i> Marcar como pagada</button>
     </div>`).join('');
