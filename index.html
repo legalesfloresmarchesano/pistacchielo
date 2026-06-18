@@ -604,6 +604,26 @@ window.marcarEntregado = async id => {
   await addDoc(collection(db,'ventas'),{cliente:p.nombre,contacto:p.tel||'',units:p.units,monto:p.monto||0,fecha:today(),fechaVenc:fv.toISOString().split('T')[0],cond:30,cobrado:false,pedidoId:id,creadoEn:serverTimestamp()});
   await addDoc(collection(db,'movimientos'),{tipo:'venta',desc:p.nombre+' — '+p.units+' bot.',units:p.units,fecha:today(),monto:p.monto||0,creadoEn:serverTimestamp()});
 };
+window.editarVendedor = async id => {
+  const v=S.vendedores.find(x=>x.id===id);
+  if(!v)return;
+  const nuevoNombre=prompt('Nombre:',v.nombre);
+  if(nuevoNombre===null)return;
+  const nuevoTel=prompt('Teléfono:',v.tel||'');
+  if(nuevoTel===null)return;
+  await updateDoc(doc(db,'vendedores',id),{nombre:nuevoNombre.trim()||v.nombre,tel:nuevoTel.trim()});
+};
+
+window.eliminarVendedor = async id => {
+  const v=S.vendedores.find(x=>x.id===id);
+  if(!v)return;
+  const comsPend=S.comisiones.filter(c=>c.vendedorId===id&&!c.pagada);
+  let msg='¿Eliminar al vendedor '+v.nombre+'?\n\nNota: esto NO elimina su cuenta de acceso (login), solo el registro de vendedor. Para cambiar su email o contraseña, hay que crear uno nuevo con datos distintos.';
+  if(comsPend.length)msg+='\n\n⚠️ Tiene '+comsPend.length+' comisión(es) pendiente(s) de pago por '+fmt(comsPend.reduce((a,c)=>a+c.monto,0))+'.';
+  if(!confirm(msg))return;
+  await deleteDoc(doc(db,'vendedores',id));
+};
+
 window.eliminarVenta = async id => {
   const v=S.ventas.find(x=>x.id===id);
   if(!v||!confirm('¿Eliminar venta de '+v.cliente+' ('+fmt(v.monto)+')?'))return;
@@ -840,7 +860,7 @@ function renderVendedores(){
   el.innerHTML=S.vendedores.map(v=>{
     const comsPend=S.comisiones.filter(c=>c.vendedorId===v.id&&!c.pagada);
     const totalPend=comsPend.reduce((a,c)=>a+c.monto,0);
-    return`<div class="row"><div class="ri"><div class="rn">${v.nombre}</div><div class="rs">${v.email} · ${v.tel||'—'}</div></div><div style="text-align:right"><div class="rv pc">${fmt(totalPend)}</div><div style="font-size:11px;color:var(--muted)">pendiente</div></div></div>`;
+    return`<div class="row"><div class="ri"><div class="rn">${v.nombre}</div><div class="rs">${v.email} · ${v.tel||'—'}</div></div><div style="display:flex;align-items:center;gap:6px"><div style="text-align:right"><div class="rv pc">${fmt(totalPend)}</div><div style="font-size:11px;color:var(--muted)">pendiente</div></div><button onclick="editarVendedor('${v.id}')" style="background:none;border:none;color:var(--olive2);cursor:pointer;padding:4px"><i class="ti ti-edit" style="font-size:16px"></i></button><button onclick="eliminarVendedor('${v.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`;
   }).join('');
 }
 
