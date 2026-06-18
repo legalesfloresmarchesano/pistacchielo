@@ -91,6 +91,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
 /* MODAL RE-LOGIN */
 #modal-relogin{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;padding:24px}
 #modal-relogin.visible{display:flex}
+#modal-cobro{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;padding:24px}
+#modal-cobro.visible{display:flex}
 .modal-box{background:var(--white);border-radius:16px;padding:24px;width:100%;max-width:340px;border:1px solid var(--border)}
 .modal-title{font-size:15px;font-weight:700;color:var(--black);margin-bottom:4px}
 .modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
@@ -137,6 +139,21 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <input type="password" id="relogin-pass" placeholder="Tu contraseña de admin">
     <div id="relogin-error" class="err-msg" style="display:none"><i class="ti ti-alert-circle" style="font-size:13px"></i> Contraseña incorrecta</div>
     <button class="btn btn-g" onclick="confirmarRelogin()" style="margin-top:4px"><i class="ti ti-login"></i> Confirmar</button>
+  </div>
+</div>
+
+<!-- MODAL COBRO -->
+<div id="modal-cobro">
+  <div class="modal-box">
+    <input type="hidden" id="modal-cobro-venta-id">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="width:48px;height:48px;background:var(--olive);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><i class="ti ti-coin" style="font-size:22px;color:#fff"></i></div>
+      <div class="modal-title">¿Cómo abonaron?</div>
+      <div class="modal-sub" id="modal-cobro-monto">—</div>
+    </div>
+    <button class="btn btn-olive" onclick="confirmarCobro('efectivo')"><i class="ti ti-cash"></i> Efectivo</button>
+    <button class="btn btn-g" onclick="confirmarCobro('transferencia')"><i class="ti ti-building-bank"></i> Transferencia</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('modal-cobro').classList.remove('visible')" style="margin-top:4px">Cancelar</button>
   </div>
 </div>
 
@@ -266,6 +283,10 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
       <div class="g2">
         <div class="metric"><div class="mv rc" id="cobros-pend">$0</div><div class="ml">Pendiente</div></div>
         <div class="metric"><div class="mv gc" id="cobros-cob">$0</div><div class="ml">Cobrado</div></div>
+      </div>
+      <div class="g2">
+        <div class="metric"><div class="mv oc" id="cobros-efectivo">$0</div><div class="ml">Efectivo</div></div>
+        <div class="metric"><div class="mv bc" id="cobros-transferencia">$0</div><div class="ml">Transferencia</div></div>
       </div>
       <div id="cobros-list"><div class="empty">Sin datos</div></div>
     </div>
@@ -575,8 +596,16 @@ window.addVenta = async () => {
 
 window.marcarCobrado = async id => {
   const v=S.ventas.find(x=>x.id===id);
-  if(!v||!confirm('¿'+v.cliente+' abonó '+fmt(v.monto)+'?'))return;
-  await updateDoc(doc(db,'ventas',id),{cobrado:true,fechaCobro:today()});
+  if(!v)return;
+  document.getElementById('modal-cobro-venta-id').value = id;
+  document.getElementById('modal-cobro-monto').textContent = fmt(v.monto)+' — '+v.cliente;
+  document.getElementById('modal-cobro').classList.add('visible');
+};
+
+window.confirmarCobro = async (metodo) => {
+  const id = document.getElementById('modal-cobro-venta-id').value;
+  await updateDoc(doc(db,'ventas',id),{cobrado:true,fechaCobro:today(),metodoPago:metodo});
+  document.getElementById('modal-cobro').classList.remove('visible');
 };
 
 window.addGasto = async () => {
@@ -825,6 +854,10 @@ function renderCobros(){
   const pend=S.ventas.filter(v=>!v.cobrado);const cob=S.ventas.filter(v=>v.cobrado);
   document.getElementById('cobros-pend').textContent=fmt(pend.reduce((a,v)=>a+v.monto,0));
   document.getElementById('cobros-cob').textContent=fmt(cob.reduce((a,v)=>a+v.monto,0));
+  const efectivo=cob.filter(v=>v.metodoPago==='efectivo').reduce((a,v)=>a+v.monto,0);
+  const transferencia=cob.filter(v=>v.metodoPago==='transferencia').reduce((a,v)=>a+v.monto,0);
+  document.getElementById('cobros-efectivo').textContent=fmt(efectivo);
+  document.getElementById('cobros-transferencia').textContent=fmt(transferencia);
   const el=document.getElementById('cobros-list');let html='';
   if(pend.length){
     html+='<div class="sep">Pendientes de cobro</div>';
@@ -832,7 +865,7 @@ function renderCobros(){
       return`<div class="pedido-card ${dias>0?'nuevo':''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><div style="font-weight:600;font-size:14px">${v.cliente}</div><div style="font-size:12px;color:var(--muted)">${v.units} bot. · vence ${fmtF(v.fechaVenc)}</div>${dias>0?`<div style="font-size:11px;color:#b84040">Vencido hace ${dias} días</div>`:''}</div><div class="rv rc">${fmt(v.monto)}</div></div><button class="btn btn-g" style="margin-top:8px;padding:9px" onclick="marcarCobrado('${v.id}')"><i class="ti ti-check"></i> Cobrado</button></div>`;
     }).join('');
   }
-  if(cob.length){html+='<div class="sep" style="margin-top:12px">Cobrados</div>';html+=cob.map(v=>`<div class="row"><div class="ri"><div class="rn">${v.cliente}</div><div class="rs">Cobrado ${fmtF(v.fechaCobro)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="rv gc">${fmt(v.monto)}</div><button onclick="eliminarVenta('${v.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');}
+  if(cob.length){html+='<div class="sep" style="margin-top:12px">Cobrados</div>';html+=cob.map(v=>`<div class="row"><div class="ri"><div class="rn">${v.cliente}</div><div class="rs">Cobrado ${fmtF(v.fechaCobro)}${v.metodoPago?' · '+(v.metodoPago==='efectivo'?'Efectivo':'Transferencia'):''}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="rv gc">${fmt(v.monto)}</div><button onclick="eliminarVenta('${v.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');}
   if(!html)html='<div class="empty">Sin cobros</div>';
   el.innerHTML=html;
 }
