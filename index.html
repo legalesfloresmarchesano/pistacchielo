@@ -387,6 +387,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         <label>Cantidad de botellas</label><input type="number" id="vc-units" placeholder="0" min="1" oninput="calcComision()">
         <label>Precio de venta</label>
         <div class="precio-opt">
+          <input type="radio" name="vprecio" id="vp0" value="45000" onchange="calcComision()">
+          <label for="vp0">$45.000<br><span style="font-size:10px;font-weight:400">Unitario</span></label>
           <input type="radio" name="vprecio" id="vp1" value="34500" onchange="calcComision()">
           <label for="vp1">$34.500<br><span style="font-size:10px;font-weight:400">1 caja</span></label>
           <input type="radio" name="vprecio" id="vp2" value="29500" onchange="calcComision()">
@@ -761,7 +763,7 @@ window.calcComision = () => {
   const precioUnitCobrar = metodo==='transferencia' ? Math.round(precioBase*1.105) : precioBase;
   const totalCobrar = units * precioUnitCobrar;
   const totalBase = units * precioBase;
-  const pct = precioBase===29500 ? 10 : 15;
+  const pct = precioBase===29500 ? 10 : precioBase===45000 ? 23.33 : 15;
   const comision = totalBase * pct / 100;
   document.getElementById('cp-preciounit').textContent = fmt(precioUnitCobrar);
   document.getElementById('cp-total').textContent = fmt(totalCobrar);
@@ -786,7 +788,7 @@ window.vendedorAddPedido = async () => {
   const precioUnit=metodoPago==='transferencia'?Math.round(precioBase*1.105):precioBase;
   const total=units*precioUnit;
   const totalBase=units*precioBase;
-  const pct=precioBase===29500?10:15;
+  const pct=precioBase===29500?10:precioBase===45000?23.33:15;
   const comisionMonto=totalBase*pct/100;
   const pedidoRef = await addDoc(collection(db,'pedidos'),{
     nombre,cuit,tel,dir,units,precioUnit,precioBase,metodoPago,monto:total,fecha,notas,
