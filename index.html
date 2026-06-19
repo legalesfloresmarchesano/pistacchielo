@@ -680,6 +680,12 @@ window.editarVendedor = async id => {
   await updateDoc(doc(db,'vendedores',id),{nombre:nuevoNombre.trim()||v.nombre,tel:nuevoTel.trim()});
 };
 
+window.eliminarOpen = async id => {
+  const o=S.opens.find(x=>x.id===id);
+  if(!o||!confirm('¿Eliminar open bottle de '+o.cliente+' ('+o.units+' bot.)?\n\nEsto le devolverá las botellas al stock disponible.'))return;
+  await deleteDoc(doc(db,'opens',id));
+};
+
 window.eliminarGasto = async (id, archivoPath) => {
   const g=S.gastos.find(x=>x.id===id);
   if(!g||!confirm('¿Eliminar el gasto "'+g.desc+'" ('+fmt(g.monto)+')?'))return;
@@ -905,7 +911,7 @@ function renderStock(){
 function renderOpenList(){
   const el=document.getElementById('open-list');
   if(!S.opens.length){el.innerHTML='<div class="empty">Sin registros</div>';return;}
-  el.innerHTML=S.opens.map(o=>`<div class="row"><div class="ri"><div class="rn">${o.cliente} — ${o.units} bot.</div><div class="rs">${fmtF(o.fecha)} · ${o.motivo}</div></div><div class="rv oc">-${o.units}</div></div>`).join('');
+  el.innerHTML=S.opens.map(o=>`<div class="row"><div class="ri"><div class="rn">${o.cliente} — ${o.units} bot.</div><div class="rs">${fmtF(o.fecha)} · ${o.motivo}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="rv oc">-${o.units}</div><button onclick="eliminarOpen('${o.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');
 }
 
 function renderVentas(){
