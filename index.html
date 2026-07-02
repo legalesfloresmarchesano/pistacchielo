@@ -208,7 +208,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <div class="section" id="s-stock">
       <div class="card">
         <div class="card-hd"><i class="ti ti-package"></i> Ajustar stock</div>
-        <label>Stock inicial / reposicion (unidades)</label>
+        <label>Botellas a agregar (se suman al stock disponible)</label>
         <div style="display:flex;gap:8px;margin-bottom:4px">
           <input type="number" id="stock-input" placeholder="120" style="margin-bottom:0">
           <button class="btn btn-g btn-sm" onclick="actualizarStock()">Guardar</button>
@@ -585,10 +585,11 @@ function stockActual() {
 window.actualizarStock = async () => {
   const v=parseInt(document.getElementById('stock-input').value);
   if(!v||v<1){alert('Ingresa un numero valido');return;}
-  await setDoc(doc(db,'config','stock'),{inicial:v});
-  await addDoc(collection(db,'movimientos'),{tipo:'ajuste',desc:'Stock actualizado a '+v,units:v,fecha:today(),creadoEn:serverTimestamp()});
+  const nuevoInicial = S.stockInicial + v;
+  await setDoc(doc(db,'config','stock'),{inicial:nuevoInicial});
+  await addDoc(collection(db,'movimientos'),{tipo:'ajuste',desc:'Reposicion: +'+v+' bot. (total inicial: '+nuevoInicial+')',units:v,fecha:today(),creadoEn:serverTimestamp()});
   document.getElementById('stock-input').value='';
-  alert('Stock actualizado: '+v+' botellas');
+  alert('Stock actualizado: se sumaron '+v+' botellas. Nuevo stock inicial: '+nuevoInicial);
 };
 
 window.addOpenBottle = async () => {
