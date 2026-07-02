@@ -208,9 +208,15 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <div class="section" id="s-stock">
       <div class="card">
         <div class="card-hd"><i class="ti ti-package"></i> Ajustar stock</div>
-        <label>Botellas a agregar (se suman al stock disponible)</label>
-        <div style="display:flex;gap:8px;margin-bottom:4px">
-          <input type="number" id="stock-input" placeholder="120" style="margin-bottom:0">
+        <label>Botellas a agregar o quitar</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div class="precio-opt" style="margin-bottom:0;flex-shrink:0;width:180px">
+            <input type="radio" name="stock-op" id="sop-suma" value="suma" checked>
+            <label for="sop-suma" style="padding:8px;font-size:13px">+ Sumar</label>
+            <input type="radio" name="stock-op" id="sop-resta" value="resta">
+            <label for="sop-resta" style="padding:8px;font-size:13px">- Restar</label>
+          </div>
+          <input type="number" id="stock-input" placeholder="0" style="margin-bottom:0;flex:1" min="1">
           <button class="btn btn-g btn-sm" onclick="actualizarStock()">Guardar</button>
         </div>
         <div style="font-size:12px;color:var(--muted);margin-top:4px">Disponible: <strong class="gc" id="stock-disp-lbl">-</strong> botellas</div>
@@ -584,12 +590,15 @@ function stockActual() {
 
 window.actualizarStock = async () => {
   const v=parseInt(document.getElementById('stock-input').value);
+  const op=document.querySelector('input[name="stock-op"]:checked')?.value||'suma';
   if(!v||v<1){alert('Ingresa un numero valido');return;}
-  const nuevoInicial = S.stockInicial + v;
+  const nuevoInicial = op==='suma' ? S.stockInicial + v : S.stockInicial - v;
+  if(nuevoInicial<0){alert('No podes restar mas de lo que hay en stock');return;}
   await setDoc(doc(db,'config','stock'),{inicial:nuevoInicial});
-  await addDoc(collection(db,'movimientos'),{tipo:'ajuste',desc:'Reposicion: +'+v+' bot. (total inicial: '+nuevoInicial+')',units:v,fecha:today(),creadoEn:serverTimestamp()});
+  const desc = op==='suma' ? 'Reposicion: +'+v+' bot. (total: '+nuevoInicial+')' : 'Ajuste manual: -'+v+' bot. (total: '+nuevoInicial+')';
+  await addDoc(collection(db,'movimientos'),{tipo:'ajuste',desc,units:v,fecha:today(),creadoEn:serverTimestamp()});
   document.getElementById('stock-input').value='';
-  alert('Stock actualizado: se sumaron '+v+' botellas. Nuevo stock inicial: '+nuevoInicial);
+  alert((op==='suma'?'Se sumaron ':'Se restaron ')+v+' botellas. Stock inicial: '+nuevoInicial);
 };
 
 window.addOpenBottle = async () => {
