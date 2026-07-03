@@ -99,6 +99,25 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
 .feria-resumen .fr-val.pend{color:#f0a0a0}
 .feria-resumen .fr-val.ok{color:#a8d890}
 </style>
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1433390961931398');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1433390961931398&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
 </head>
 <body>
 <div id="loading"><div class="spinner"></div><div style="font-family:'Dancing Script',cursive;font-size:34px;color:var(--black)">Pistacchielo</div></div>
@@ -1008,6 +1027,7 @@ window.vendedorAddPedido = async () => {
   document.querySelectorAll('input[name="vprecio"]').forEach(r=>r.checked=false);
   document.getElementById('vm1').checked=true;
   document.getElementById('comision-preview').style.display='none';
+  if(typeof fbq==='function'){ fbq('track','Lead',{value:total,currency:'ARS',content_name:'Pedido vendedor'}); }
   alert('Pedido enviado. Total a cobrar: '+fmt(total)+'\nComision generada: '+fmt(comisionMonto));
 };
 
