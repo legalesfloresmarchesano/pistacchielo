@@ -593,8 +593,8 @@ function startAdminListeners() {
     renderComisiones(); renderResumen(); renderInicio(); renderStats();
     S.comisiones.forEach(async c => { if(c.pagada&&c.fechaPago){const dias=Math.floor((new Date()-new Date(c.fechaPago+'T00:00:00'))/(1000*60*60*24));if(dias>=7) await deleteDoc(doc(db,'comisiones',c.id));} });
   }));
-  unsubs.push(onSnapshot(query(collection(db,'ferias'),orderBy('fecha','desc')), snap => { S.ferias=snap.docs.map(d=>({id:d.id,...d.data()})); renderFeriaAdmin(); renderInicio(); renderAlertas(); }));
-  unsubs.push(onSnapshot(query(collection(db,'rendiciones'),orderBy('fecha','desc')), snap => { S.rendiciones=snap.docs.map(d=>({id:d.id,...d.data()})); renderFeriaAdmin(); renderAlertas(); }));
+  unsubs.push(onSnapshot(query(collection(db,'ferias'),orderBy('fecha','desc')), snap => { S.ferias=snap.docs.map(d=>({id:d.id,...d.data()})); renderFeriaAdmin(); renderInicio(); renderAlertas(); actualizarSelectorFeriaRendicion(); }));
+  unsubs.push(onSnapshot(query(collection(db,'rendiciones'),orderBy('fecha','desc')), snap => { S.rendiciones=snap.docs.map(d=>({id:d.id,...d.data()})); renderFeriaAdmin(); renderAlertas(); actualizarSelectorFeriaRendicion(); }));
 }
 
 function startVendedorListeners(uid) {
@@ -683,6 +683,7 @@ function actualizarSelectorVendedoras() {
       sel.appendChild(opt);
     });
   });
+  actualizarSelectorFeriaRendicion();
 }
 
 function actualizarSelectorFeriaRendicion() {
@@ -775,7 +776,7 @@ function renderVendFeria() {
   const totalR=rendiciones.reduce((a,r)=>a+(r.units||0),0);
   const totalDev=rendiciones.reduce((a,r)=>a+(r.devueltas||0),0);
   const totalOpen=opens.reduce((a,o)=>a+o.units,0);
-  const saldoBots=totalE-totalR-totalDev;
+  const saldoBots=totalE-totalR-totalDev-totalOpen;
   const saldoPesos=saldoBots*PRECIO_FERIA;
 
   const resEl=document.getElementById('vend-feria-resumen');
@@ -842,11 +843,14 @@ window.registrarRendicion = async () => {
   const feria=S.ferias.find(f=>f.id===feriaId);
   if(!feria) return;
   const vendedora=S.vendedores.find(v=>v.id===vendedoraId);
-  // calcular disponibles (entregadas - ya rendidas - ya devueltas)
-  const yaUsadas=S.rendiciones.filter(r=>r.feriaId===feriaId).reduce((a,r)=>a+(r.units||0)+(r.devueltas||0),0);
-  const disponibles=feria.units-yaUsadas;
+  // calcular disponibles (entregadas a la vendedora - ya rendidas - ya devueltas - open bottles usadas)
+  const totalE=S.ferias.filter(f=>f.vendedoraId===vendedoraId).reduce((a,f)=>a+(f.units||0),0);
+  const totalR=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.units||0),0);
+  const totalDev=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.devueltas||0),0);
+  const totalOpen=S.opens.filter(o=>o.vendedoraId===vendedoraId).reduce((a,o)=>a+(o.units||0),0);
+  const disponibles=totalE-totalR-totalDev-totalOpen;
   const total=units+devueltas;
-  if(total>disponibles){alert('Solo quedan '+disponibles+' botellas disponibles de esta feria (vendidas + devueltas no pueden superar ese numero)');return;}
+  if(total>disponibles){alert('Solo quedan '+disponibles+' botellas disponibles ('+totalOpen+' ya fueron open bottle). Vendidas + devueltas no pueden superar ese numero.');return;}
   await addDoc(collection(db,'rendiciones'),{
     feriaId, feriaName:feria.nombre,
     vendedoraId, vendedoraNombre:vendedora?.nombre||feria.vendedoraNombre||'',
@@ -1276,6 +1280,7 @@ function renderAlertas(){
   const feriaGrupos={};
   S.ferias.forEach(f=>{if(!feriaGrupos[f.vendedoraId])feriaGrupos[f.vendedoraId]={nombre:f.vendedoraNombre,total:0};feriaGrupos[f.vendedoraId].total+=f.units;});
   S.rendiciones.forEach(r=>{if(feriaGrupos[r.vendedoraId])feriaGrupos[r.vendedoraId].total-=((r.units||0)+(r.devueltas||0));});
+  S.opens.forEach(o=>{if(o.vendedoraId&&feriaGrupos[o.vendedoraId])feriaGrupos[o.vendedoraId].total-=(o.units||0);});
   const feriaDeuda=Object.values(feriaGrupos).filter(g=>g.total>0);
   let html='';
   nuevos.forEach(p=>{html+=`<div class="alert-box ar" style="margin-bottom:8px;animation:pulse 1.8s infinite"><i class="ti ti-shopping-cart" style="color:#b84040"></i><div><div class="at">${p.nombre} - ${p.units} bot.</div><div class="asb">${p.dir||''} - ${fmtF(p.fecha)}</div></div></div>`;});
