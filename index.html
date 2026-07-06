@@ -31,7 +31,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 #notif-badge{background:#c0392b;color:#fff;border-radius:20px;padding:1px 6px;font-size:11px;font-weight:700}
 .nav{display:flex;overflow-x:auto;background:var(--white);border-bottom:1px solid var(--border);scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
-.nav-btn{flex:none;padding:10px 8px;font-size:11px;font-weight:500;color:var(--muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:3px}
+.nav-btn{flex:none;padding:8px 5px;font-size:10px;font-weight:500;color:var(--muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:2px}
+.nav-btn i{font-size:12px}
 .nav-btn.active{color:var(--olive2);border-bottom-color:var(--olive);font-weight:700}
 .content{padding:14px;padding-bottom:30px}
 .section{display:none}.section.active{display:block}
@@ -99,25 +100,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
 .feria-resumen .fr-val.pend{color:#f0a0a0}
 .feria-resumen .fr-val.ok{color:#a8d890}
 </style>
-
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1433390961931398');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1433390961931398&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
-
 </head>
 <body>
 <div id="loading"><div class="spinner"></div><div style="font-family:'Dancing Script',cursive;font-size:34px;color:var(--black)">Pistacchielo</div></div>
@@ -188,7 +170,7 @@ src="https://www.facebook.com/tr?id=1433390961931398&ev=PageView&noscript=1"
     <button class="nav-btn" id="nb-ventas" onclick="goTab('ventas')"><i class="ti ti-chart-bar"></i> Ventas</button>
     <button class="nav-btn" id="nb-cobros" onclick="goTab('cobros')"><i class="ti ti-coin"></i> Cobros</button>
     <button class="nav-btn" id="nb-gastos" onclick="goTab('gastos')"><i class="ti ti-receipt"></i> Gastos</button>
-    <button class="nav-btn" id="nb-vendedores" onclick="goTab('vendedores')"><i class="ti ti-users"></i> Vendedores</button>
+    <button class="nav-btn" id="nb-vendedores" onclick="goTab('vendedores')"><i class="ti ti-users"></i> Vend.</button>
     <button class="nav-btn" id="nb-stats" onclick="goTab('stats')"><i class="ti ti-chart-pie"></i> Stats</button>
     <button class="nav-btn" id="nb-clientes" onclick="goTab('clientes')"><i class="ti ti-address-book"></i> Clientes</button>
     <button class="nav-btn" id="nb-alertas" onclick="goTab('alertas')"><i class="ti ti-bell"></i> Alertas</button>
@@ -1027,7 +1009,6 @@ window.vendedorAddPedido = async () => {
   document.querySelectorAll('input[name="vprecio"]').forEach(r=>r.checked=false);
   document.getElementById('vm1').checked=true;
   document.getElementById('comision-preview').style.display='none';
-  if(typeof fbq==='function'){ fbq('track','Lead',{value:total,currency:'ARS',content_name:'Pedido vendedor'}); }
   alert('Pedido enviado. Total a cobrar: '+fmt(total)+'\nComision generada: '+fmt(comisionMonto));
 };
 
