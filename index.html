@@ -31,8 +31,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 #notif-badge{background:#c0392b;color:#fff;border-radius:20px;padding:1px 6px;font-size:11px;font-weight:700}
 .nav{display:flex;overflow-x:auto;background:var(--white);border-bottom:1px solid var(--border);scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
-.nav-btn{flex:none;padding:8px 5px;font-size:10px;font-weight:500;color:var(--muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:2px}
-.nav-btn i{font-size:12px}
+.nav-btn{flex:none;padding:10px 8px;font-size:11px;font-weight:500;color:var(--muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:3px}
 .nav-btn.active{color:var(--olive2);border-bottom-color:var(--olive);font-weight:700}
 .content{padding:14px;padding-bottom:30px}
 .section{display:none}.section.active{display:block}
@@ -100,6 +99,25 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
 .feria-resumen .fr-val.pend{color:#f0a0a0}
 .feria-resumen .fr-val.ok{color:#a8d890}
 </style>
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1433390961931398');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1433390961931398&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
 </head>
 <body>
 <div id="loading"><div class="spinner"></div><div style="font-family:'Dancing Script',cursive;font-size:34px;color:var(--black)">Pistacchielo</div></div>
@@ -170,7 +188,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <button class="nav-btn" id="nb-ventas" onclick="goTab('ventas')"><i class="ti ti-chart-bar"></i> Ventas</button>
     <button class="nav-btn" id="nb-cobros" onclick="goTab('cobros')"><i class="ti ti-coin"></i> Cobros</button>
     <button class="nav-btn" id="nb-gastos" onclick="goTab('gastos')"><i class="ti ti-receipt"></i> Gastos</button>
-    <button class="nav-btn" id="nb-vendedores" onclick="goTab('vendedores')"><i class="ti ti-users"></i> Vend.</button>
+    <button class="nav-btn" id="nb-vendedores" onclick="goTab('vendedores')"><i class="ti ti-users"></i> Vendedores</button>
     <button class="nav-btn" id="nb-stats" onclick="goTab('stats')"><i class="ti ti-chart-pie"></i> Stats</button>
     <button class="nav-btn" id="nb-clientes" onclick="goTab('clientes')"><i class="ti ti-address-book"></i> Clientes</button>
     <button class="nav-btn" id="nb-alertas" onclick="goTab('alertas')"><i class="ti ti-bell"></i> Alertas</button>
@@ -261,6 +279,26 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
         </div>
         <label>Notas</label><input id="f-notas" placeholder="Observaciones...">
         <button class="btn btn-g" onclick="addEntregaFeria()"><i class="ti ti-send"></i> Registrar entrega</button>
+      </div>
+      <div class="card">
+        <div class="card-hd"><i class="ti ti-cash"></i> Registrar rendicion</div>
+        <label>Vendedora</label>
+        <select id="r-vendedora" onchange="actualizarSelectorFeriaRendicion()"><option value="">Selecciona una vendedora</option></select>
+        <label>Feria / evento</label>
+        <select id="r-feria-sel"><option value="">Selecciona la feria</option></select>
+        <div class="form-grid">
+          <div><label>Botellas vendidas (rinden $30.000 c/u)</label><input type="number" id="r-units" placeholder="0" min="0" oninput="calcRendicion()"></div>
+          <div><label>Botellas devueltas (vuelven al stock)</label><input type="number" id="r-devueltas" placeholder="0" min="0" oninput="calcRendicion()"></div>
+        </div>
+        <div id="r-preview" style="display:none;background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:8px;font-size:13px">
+          <div style="display:flex;justify-content:space-between"><span>Total a rendir:</span><strong id="r-prev-monto" style="color:var(--olive2)">$0</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Botellas que vuelven al stock:</span><strong id="r-prev-dev">0</strong></div>
+        </div>
+        <label>Fecha</label>
+        <input type="date" id="r-fecha">
+        <label>Notas</label>
+        <input id="r-notas" placeholder="Observaciones...">
+        <button class="btn btn-g" onclick="registrarRendicion()"><i class="ti ti-check"></i> Registrar rendicion</button>
       </div>
       <div class="card">
         <div class="card-hd"><i class="ti ti-list"></i> Historial por vendedora</div>
@@ -437,24 +475,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;font-wei
     <!-- FERIA VENDEDORA -->
     <div class="section" id="vs-feria">
       <div id="vend-feria-resumen"></div>
-      <div class="card">
-        <div class="card-hd"><i class="ti ti-cash"></i> Registrar rendicion</div>
-        <label>Feria / evento</label>
-        <select id="vf-entrega-sel"><option value="">Selecciona la feria</option></select>
-        <div class="form-grid">
-          <div><label>Botellas vendidas (rinden $30.000 c/u)</label><input type="number" id="vf-units" placeholder="0" min="0" oninput="calcRendicion()"></div>
-          <div><label>Botellas devueltas (vuelven al stock)</label><input type="number" id="vf-devueltas" placeholder="0" min="0" oninput="calcRendicion()"></div>
-        </div>
-        <div id="vf-preview" style="display:none;background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:8px;font-size:13px">
-          <div style="display:flex;justify-content:space-between"><span>Total a rendir:</span><strong id="vf-prev-monto" style="color:var(--olive2)">$0</strong></div>
-          <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Botellas que vuelven al stock:</span><strong id="vf-prev-dev">0</strong></div>
-        </div>
-        <label>Fecha</label>
-        <input type="date" id="vf-fecha">
-        <label>Notas</label>
-        <input id="vf-notas" placeholder="Observaciones...">
-        <button class="btn btn-g" onclick="registrarRendicion()"><i class="ti ti-check"></i> Registrar rendicion</button>
-      </div>
       <div class="card">
         <div class="card-hd"><i class="ti ti-list"></i> Mis movimientos de feria</div>
         <div id="vend-feria-list"><div class="empty">Sin movimientos</div></div>
@@ -636,14 +656,30 @@ function actualizarSelectorOpenVendedora() {
 }
 
 function actualizarSelectorVendedoras() {
-  const sel=document.getElementById('f-vendedora');
+  ['f-vendedora','r-vendedora'].forEach(id => {
+    const sel=document.getElementById(id);
+    if(!sel) return;
+    const val=sel.value;
+    sel.innerHTML='<option value="">Selecciona una vendedora</option>';
+    S.vendedores.forEach(v => {
+      const opt=document.createElement('option');
+      opt.value=v.id; opt.textContent=v.nombre;
+      if(v.id===val) opt.selected=true;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function actualizarSelectorFeriaRendicion() {
+  const vendedoraId=document.getElementById('r-vendedora')?.value||'';
+  const sel=document.getElementById('r-feria-sel');
   if(!sel) return;
   const val=sel.value;
-  sel.innerHTML='<option value="">Selecciona una vendedora</option>';
-  S.vendedores.forEach(v => {
+  sel.innerHTML='<option value="">Selecciona la feria</option>';
+  S.ferias.filter(f=>f.vendedoraId===vendedoraId).forEach(f=>{
     const opt=document.createElement('option');
-    opt.value=v.id; opt.textContent=v.nombre;
-    if(v.id===val) opt.selected=true;
+    opt.value=f.id; opt.textContent=f.nombre+' ('+f.units+' bot. - '+fmtF(f.fecha)+')';
+    if(f.id===val) opt.selected=true;
     sel.appendChild(opt);
   });
 }
@@ -746,18 +782,6 @@ function renderVendFeria() {
     }
   }
 
-  const sel=document.getElementById('vf-entrega-sel');
-  if(sel){
-    const val=sel.value;
-    sel.innerHTML='<option value="">Selecciona la feria</option>';
-    ferias.forEach(f=>{
-      const opt=document.createElement('option');
-      opt.value=f.id; opt.textContent=f.nombre+' ('+f.units+' bot. - '+fmtF(f.fecha)+')';
-      if(f.id===val) opt.selected=true;
-      sel.appendChild(opt);
-    });
-  }
-
   const listEl=document.getElementById('vend-feria-list');
   if(!listEl) return;
   let html='';
@@ -781,33 +805,36 @@ function renderVendFeria() {
 }
 
 window.calcRendicion = () => {
-  const units=parseInt(document.getElementById('vf-units').value)||0;
-  const devueltas=parseInt(document.getElementById('vf-devueltas').value)||0;
-  const prev=document.getElementById('vf-preview');
+  const units=parseInt(document.getElementById('r-units').value)||0;
+  const devueltas=parseInt(document.getElementById('r-devueltas').value)||0;
+  const prev=document.getElementById('r-preview');
   if(!units&&!devueltas){prev.style.display='none';return;}
-  document.getElementById('vf-prev-monto').textContent=fmt(units*PRECIO_FERIA);
-  document.getElementById('vf-prev-dev').textContent=devueltas+' bot.';
+  document.getElementById('r-prev-monto').textContent=fmt(units*PRECIO_FERIA);
+  document.getElementById('r-prev-dev').textContent=devueltas+' bot.';
   prev.style.display='block';
 };
 
 window.registrarRendicion = async () => {
-  const feriaId=document.getElementById('vf-entrega-sel').value;
-  const units=parseInt(document.getElementById('vf-units').value)||0;
-  const devueltas=parseInt(document.getElementById('vf-devueltas').value)||0;
-  const fecha=document.getElementById('vf-fecha').value||today();
-  const notas=document.getElementById('vf-notas').value;
+  const vendedoraId=document.getElementById('r-vendedora').value;
+  const feriaId=document.getElementById('r-feria-sel').value;
+  const units=parseInt(document.getElementById('r-units').value)||0;
+  const devueltas=parseInt(document.getElementById('r-devueltas').value)||0;
+  const fecha=document.getElementById('r-fecha').value||today();
+  const notas=document.getElementById('r-notas').value;
+  if(!vendedoraId){alert('Selecciona la vendedora');return;}
   if(!feriaId){alert('Selecciona la feria');return;}
   if(!units&&!devueltas){alert('Ingresa botellas vendidas y/o devueltas');return;}
-  const feria=(S.vendFerias||[]).find(f=>f.id===feriaId);
+  const feria=S.ferias.find(f=>f.id===feriaId);
   if(!feria) return;
+  const vendedora=S.vendedores.find(v=>v.id===vendedoraId);
   // calcular disponibles (entregadas - ya rendidas - ya devueltas)
-  const yaUsadas=(S.vendRendiciones||[]).filter(r=>r.feriaId===feriaId).reduce((a,r)=>a+(r.units||0)+(r.devueltas||0),0);
+  const yaUsadas=S.rendiciones.filter(r=>r.feriaId===feriaId).reduce((a,r)=>a+(r.units||0)+(r.devueltas||0),0);
   const disponibles=feria.units-yaUsadas;
   const total=units+devueltas;
   if(total>disponibles){alert('Solo quedan '+disponibles+' botellas disponibles de esta feria (vendidas + devueltas no pueden superar ese numero)');return;}
   await addDoc(collection(db,'rendiciones'),{
     feriaId, feriaName:feria.nombre,
-    vendedoraId:S.currentUser.uid, vendedoraNombre:S.currentVendedor.nombre,
+    vendedoraId, vendedoraNombre:vendedora?.nombre||feria.vendedoraNombre||'',
     units, devueltas, fecha, notas,
     monto:units*PRECIO_FERIA, creadoEn:serverTimestamp()
   });
@@ -815,16 +842,17 @@ window.registrarRendicion = async () => {
   if(devueltas>0){
     await addDoc(collection(db,'movimientos'),{
       tipo:'devolucion_feria',
-      desc:'Devolucion feria '+feria.nombre+' - '+S.currentVendedor.nombre+' - '+devueltas+' bot.',
+      desc:'Devolucion feria '+feria.nombre+' - '+(vendedora?.nombre||'')+' - '+devueltas+' bot.',
       units:devueltas, fecha, creadoEn:serverTimestamp()
     });
     // actualizar stock sumando las devueltas
     const nuevoStock = S.stockInicial + devueltas;
     await setDoc(doc(db,'config','stock'),{inicial:nuevoStock});
   }
-  ['vf-units','vf-devueltas','vf-notas'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('vf-entrega-sel').value='';
-  document.getElementById('vf-preview').style.display='none';
+  ['r-units','r-devueltas','r-notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('r-vendedora').value='';
+  document.getElementById('r-feria-sel').innerHTML='<option value="">Selecciona la feria</option>';
+  document.getElementById('r-preview').style.display='none';
   let msg='Rendicion registrada';
   if(units) msg+='\nVendidas: '+units+' bot. - '+fmt(units*PRECIO_FERIA);
   if(devueltas) msg+='\nDevueltas al stock: '+devueltas+' bot.';
@@ -1009,6 +1037,7 @@ window.vendedorAddPedido = async () => {
   document.querySelectorAll('input[name="vprecio"]').forEach(r=>r.checked=false);
   document.getElementById('vm1').checked=true;
   document.getElementById('comision-preview').style.display='none';
+  if(typeof fbq==='function'){ fbq('track','Lead',{value:total,currency:'ARS',content_name:'Pedido vendedor'}); }
   alert('Pedido enviado. Total a cobrar: '+fmt(total)+'\nComision generada: '+fmt(comisionMonto));
 };
 
