@@ -249,7 +249,8 @@ src="https://www.facebook.com/tr?id=1433390961931398&ev=PageView&noscript=1"
         <div class="card-hd"><i class="ti ti-gift"></i> Registrar open bottle</div>
         <label>Cliente / local</label><input id="ob-cliente" placeholder="A quien se le dio?">
         <label>Asignar a vendedora (opcional)</label>
-        <select id="ob-vendedora"><option value="">— Sin asignar —</option></select>
+        <select id="ob-vendedora" onchange="actualizarDispVendedora()"><option value="">— Sin asignar —</option></select>
+        <div id="ob-disp-lbl" style="display:none;font-size:12px;color:var(--muted);margin:-8px 0 10px">Disponible: <strong class="gc" id="ob-disp-val">-</strong> botellas</div>
         <div class="form-grid">
           <div><label>Unidades</label><input type="number" id="ob-units" placeholder="0" min="1"></div>
           <div><label>Fecha</label><input type="date" id="ob-fecha"></div>
@@ -641,6 +642,20 @@ window.addOpenBottle = async () => {
   ['ob-cliente','ob-units','ob-notas'].forEach(id=>document.getElementById(id).value='');
   if(vSel) vSel.value='';
 };
+
+function actualizarDispVendedora() {
+  const vendedoraId=document.getElementById('ob-vendedora')?.value||'';
+  const lbl=document.getElementById('ob-disp-lbl');
+  if(!lbl) return;
+  if(!vendedoraId){lbl.style.display='none';return;}
+  const totalE=S.ferias.filter(f=>f.vendedoraId===vendedoraId).reduce((a,f)=>a+(f.units||0),0);
+  const totalR=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.units||0),0);
+  const totalDev=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.devueltas||0),0);
+  const totalOpen=S.opens.filter(o=>o.vendedoraId===vendedoraId).reduce((a,o)=>a+(o.units||0),0);
+  const disponible=totalE-totalR-totalDev-totalOpen;
+  document.getElementById('ob-disp-val').textContent=disponible;
+  lbl.style.display='block';
+}
 
 function actualizarSelectorOpenVendedora() {
   const sel=document.getElementById('ob-vendedora');
