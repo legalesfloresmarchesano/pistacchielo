@@ -617,6 +617,19 @@ function stockActual() {
   return Math.max(0, S.stockInicial - vend - open - feria);
 }
 
+// Cupo de open bottles: ledger totalmente separado del de venta.
+// Un registro en 'opens' sin feriaId = ASIGNACION de cupo a la vendedora (suma).
+// Un registro en 'opens' con feriaId = CONSUMO de ese cupo (resta).
+function cupoOpenAsignado(vendedoraId, lista) {
+  return (lista||S.opens).filter(o=>o.vendedoraId===vendedoraId && !o.feriaId).reduce((a,o)=>a+(o.units||0),0);
+}
+function cupoOpenConsumido(vendedoraId, lista) {
+  return (lista||S.opens).filter(o=>o.vendedoraId===vendedoraId && o.feriaId).reduce((a,o)=>a+(o.units||0),0);
+}
+function cupoOpenDisponible(vendedoraId, lista) {
+  return cupoOpenAsignado(vendedoraId, lista) - cupoOpenConsumido(vendedoraId, lista);
+}
+
 window.actualizarStock = async () => {
   const v=parseInt(document.getElementById('stock-input').value);
   const op=document.querySelector('input[name="stock-op"]:checked')?.value||'suma';
@@ -652,12 +665,10 @@ function actualizarDispVendedora() {
   const lbl=document.getElementById('ob-disp-lbl');
   if(!lbl) return;
   if(!vendedoraId){lbl.style.display='none';return;}
-  const totalE=S.ferias.filter(f=>f.vendedoraId===vendedoraId).reduce((a,f)=>a+(f.units||0),0);
-  const totalR=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.units||0),0);
-  const totalDev=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.devueltas||0),0);
-  const totalOpen=S.opens.filter(o=>o.vendedoraId===vendedoraId).reduce((a,o)=>a+(o.units||0),0);
-  const disponible=totalE-totalR-totalDev-totalOpen;
-  document.getElementById('ob-disp-val').textContent=disponible;
+  const asignado=cupoOpenAsignado(vendedoraId);
+  const consumido=cupoOpenConsumido(vendedoraId);
+  const disponible=asignado-consumido;
+  document.getElementById('ob-disp-val').textContent=disponible+' (de '+asignado+' asignadas, '+consumido+' consumidas)';
   lbl.style.display='block';
 }
 
@@ -698,10 +709,12 @@ function actualizarDispRendicion() {
   const totalE=S.ferias.filter(f=>f.vendedoraId===vendedoraId).reduce((a,f)=>a+(f.units||0),0);
   const totalR=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.units||0),0);
   const totalDev=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.devueltas||0),0);
-  const totalOpen=S.opens.filter(o=>o.vendedoraId===vendedoraId).reduce((a,o)=>a+(o.units||0),0);
-  const disponible=totalE-totalR-totalDev-totalOpen;
+  const disponible=totalE-totalR-totalDev;
+  const cupoAsig=cupoOpenAsignado(vendedoraId);
+  const cupoCons=cupoOpenConsumido(vendedoraId);
+  const cupoDisp=cupoAsig-cupoCons;
   document.getElementById('r-disp-val').textContent=disponible;
-  document.getElementById('r-disp-open').textContent=totalOpen>0?('('+totalOpen+' ya usadas como open)'):'';
+  document.getElementById('r-disp-open').textContent=cupoAsig>0?('| Open disponible: '+cupoDisp+' (de '+cupoAsig+' asignadas)'):'';
   lbl.style.display='block';
 }
 
@@ -751,15 +764,20 @@ window.eliminarRendicion = async id => {
 function renderFeriaAdmin() {
   const el=document.getElementById('feria-admin-list');
   if(!el) return;
-  if(!S.ferias.length&&!S.rendiciones.length){el.innerHTML='<div class="empty">Sin registros</div>';return;}
+  if(!S.ferias.length&&!S.rendiciones.length&&!S.opens.length){el.innerHTML='<div class="empty">Sin registros</div>';return;}
   const grupos={};
   S.ferias.forEach(f=>{
-    if(!grupos[f.vendedoraId]) grupos[f.vendedoraId]={nombre:f.vendedoraNombre,entregas:[],rendiciones:[]};
+    if(!grupos[f.vendedoraId]) grupos[f.vendedoraId]={nombre:f.vendedoraNombre,entregas:[],rendiciones:[],opens:[]};
     grupos[f.vendedoraId].entregas.push(f);
   });
   S.rendiciones.forEach(r=>{
-    if(!grupos[r.vendedoraId]) grupos[r.vendedoraId]={nombre:r.vendedoraNombre,entregas:[],rendiciones:[]};
+    if(!grupos[r.vendedoraId]) grupos[r.vendedoraId]={nombre:r.vendedoraNombre,entregas:[],rendiciones:[],opens:[]};
     grupos[r.vendedoraId].rendiciones.push(r);
+  });
+  S.opens.forEach(o=>{
+    if(!o.vendedoraId) return;
+    if(!grupos[o.vendedoraId]) grupos[o.vendedoraId]={nombre:o.vendedoraNombre,entregas:[],rendiciones:[],opens:[]};
+    grupos[o.vendedoraId].opens.push(o);
   });
   let html='';
   Object.values(grupos).forEach(g=>{
@@ -768,6 +786,9 @@ function renderFeriaAdmin() {
     const totalDev=g.rendiciones.reduce((a,r)=>a+(r.devueltas||0),0);
     const saldoBots=totalE-totalR-totalDev;
     const saldoPesos=saldoBots*PRECIO_FERIA;
+    const cupoAsig=g.opens.filter(o=>!o.feriaId).reduce((a,o)=>a+(o.units||0),0);
+    const cupoCons=g.opens.filter(o=>o.feriaId).reduce((a,o)=>a+(o.units||0),0);
+    const cupoDisp=cupoAsig-cupoCons;
     html+=`<div style="background:var(--bg2);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--border)">
       <div style="font-weight:700;font-size:14px;margin-bottom:8px">${g.nombre}</div>
       <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -775,6 +796,11 @@ function renderFeriaAdmin() {
         <div class="metric" style="flex:1"><div class="mv gc">${totalR}</div><div class="ml">Rendidas</div></div>
         <div class="metric" style="flex:1"><div class="mv ${saldoBots>0?'rc':'gc'}">${saldoBots}</div><div class="ml">Saldo</div></div>
       </div>
+      ${cupoAsig>0?`<div style="display:flex;gap:8px;margin-bottom:8px">
+        <div class="metric" style="flex:1"><div class="mv oc">${cupoAsig}</div><div class="ml">Open asignadas</div></div>
+        <div class="metric" style="flex:1"><div class="mv oc">${cupoCons}</div><div class="ml">Open usadas</div></div>
+        <div class="metric" style="flex:1"><div class="mv ${cupoDisp>0?'rc':'gc'}">${cupoDisp}</div><div class="ml">Open disponibles</div></div>
+      </div>`:''}
       ${saldoPesos>0?`<div style="background:#fce8e8;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;color:#b84040;margin-bottom:8px">Debe rendir: ${fmt(saldoPesos)}</div>`:`<div style="background:#eef3dc;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--olive2);margin-bottom:8px">Al dia</div>`}
       <div class="sep">Entregas</div>
       ${g.entregas.map(f=>`<div class="row"><div class="ri"><div class="rn">${f.nombre} - ${f.units} bot.</div><div class="rs">${fmtF(f.fecha)}${f.notas?' - '+f.notas:''}</div></div><div style="display:flex;align-items:center;gap:6px"><div class="rv oc">-${f.units}</div><button onclick="eliminarEntregaFeria('${f.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px"><i class="ti ti-trash" style="font-size:15px"></i></button></div></div>`).join('')}
@@ -783,6 +809,7 @@ function renderFeriaAdmin() {
         let det=''; if(vend) det+=vend+' vend. - '+fmt(vend*PRECIO_FERIA); if(dev) det+=(det?' | ':'')+dev+' dev. al stock';
         return`<div class="row"><div class="ri"><div class="rn">${r.feriaName||'Feria'}</div><div class="rs">${fmtF(r.fecha)} - ${det}${r.notas?' - '+r.notas:''}</div></div><div style="display:flex;align-items:center;gap:6px"><div class="rv gc">${vend>0?fmt(vend*PRECIO_FERIA):'-'}</div><button onclick="eliminarRendicion('${r.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px"><i class="ti ti-trash" style="font-size:15px"></i></button></div></div>`;
       }).join('')}`:''}
+      ${g.opens.length?`<div class="sep">Open bottles (cupo / consumo)</div>${g.opens.map(o=>`<div class="row"><div class="ri"><div class="rn">${o.cliente} - ${o.units} bot.</div><div class="rs">${fmtF(o.fecha)} - ${o.feriaId?'Consumo':'Cupo asignado'}${o.notas?' - '+o.notas:''}</div></div><div style="display:flex;align-items:center;gap:6px"><div class="rv ${o.feriaId?'rc':'oc'}">${o.feriaId?'-':'+'}${o.units}</div><button onclick="eliminarOpen('${o.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px"><i class="ti ti-trash" style="font-size:15px"></i></button></div></div>`).join('')}`:''}
     </div>`;
   });
   el.innerHTML=html||'<div class="empty">Sin registros</div>';
@@ -795,9 +822,11 @@ function renderVendFeria() {
   const totalE=ferias.reduce((a,f)=>a+f.units,0);
   const totalR=rendiciones.reduce((a,r)=>a+(r.units||0),0);
   const totalDev=rendiciones.reduce((a,r)=>a+(r.devueltas||0),0);
-  const totalOpen=opens.reduce((a,o)=>a+o.units,0);
-  const saldoBots=totalE-totalR-totalDev-totalOpen;
+  const saldoBots=totalE-totalR-totalDev;
   const saldoPesos=saldoBots*PRECIO_FERIA;
+  const cupoAsig=opens.filter(o=>!o.feriaId).reduce((a,o)=>a+(o.units||0),0);
+  const cupoCons=opens.filter(o=>o.feriaId).reduce((a,o)=>a+(o.units||0),0);
+  const cupoDisp=cupoAsig-cupoCons;
 
   const resEl=document.getElementById('vend-feria-resumen');
   if(resEl){
@@ -810,7 +839,11 @@ function renderVendFeria() {
           <div class="metric" style="flex:1"><div class="mv gc">${totalR}</div><div class="ml">Rendidas</div></div>
           <div class="metric" style="flex:1"><div class="mv ${saldoBots>0?'rc':'gc'}">${saldoBots}</div><div class="ml">Saldo</div></div>
         </div>
-        ${totalOpen>0?`<div style="display:flex;gap:8px;margin-bottom:8px"><div class="metric" style="flex:1"><div class="mv oc">${totalOpen}</div><div class="ml">Open bottles</div></div></div>`:''}
+        ${cupoAsig>0?`<div style="display:flex;gap:8px;margin-bottom:8px">
+          <div class="metric" style="flex:1"><div class="mv oc">${cupoAsig}</div><div class="ml">Open asignadas</div></div>
+          <div class="metric" style="flex:1"><div class="mv oc">${cupoCons}</div><div class="ml">Open usadas</div></div>
+          <div class="metric" style="flex:1"><div class="mv ${cupoDisp>0?'rc':'gc'}">${cupoDisp}</div><div class="ml">Open disponibles</div></div>
+        </div>`:''}
         ${saldoPesos>0
           ?`<div style="background:#fce8e8;border-radius:8px;padding:10px 14px;font-size:14px;font-weight:700;color:#b84040;margin-bottom:10px">Debe rendir: ${fmt(saldoPesos)}</div>`
           :(totalE>0?`<div style="background:#eef3dc;border-radius:8px;padding:10px 14px;font-size:14px;font-weight:700;color:var(--olive2);margin-bottom:10px">Al dia con la feria</div>`:'')
@@ -826,8 +859,8 @@ function renderVendFeria() {
     html+=ferias.map(f=>`<div class="row"><div class="ri"><div class="rn">${f.nombre} - ${f.units} bot.</div><div class="rs">${fmtF(f.fecha)} - Debes rendir ${fmt(f.units*PRECIO_FERIA)}</div></div><div class="rv oc">${f.units}</div></div>`).join('');
   }
   if(opens.length){
-    html+='<div class="sep" style="margin-top:10px">Open bottles asignados</div>';
-    html+=opens.map(o=>`<div class="row"><div class="ri"><div class="rn">${o.cliente} - ${o.units} bot.</div><div class="rs">${fmtF(o.fecha)} - ${o.motivo}</div></div><div class="rv oc">${o.units}</div></div>`).join('');
+    html+='<div class="sep" style="margin-top:10px">Open bottles (cupo asignado / consumo)</div>';
+    html+=opens.map(o=>`<div class="row"><div class="ri"><div class="rn">${o.cliente} - ${o.units} bot.</div><div class="rs">${fmtF(o.fecha)} - ${o.feriaId?'Consumo':'Cupo asignado'} - ${o.motivo}</div></div><div class="rv ${o.feriaId?'rc':'oc'}">${o.feriaId?'-':'+'}${o.units}</div></div>`).join('');
   }
   if(rendiciones.length){
     html+='<div class="sep" style="margin-top:10px">Rendiciones</div>';
@@ -866,14 +899,16 @@ window.registrarRendicion = async () => {
   const feria=S.ferias.find(f=>f.id===feriaId);
   if(!feria) return;
   const vendedora=S.vendedores.find(v=>v.id===vendedoraId);
-  // calcular disponibles (entregadas a la vendedora - ya rendidas - ya devueltas - open bottles usadas)
+  // ledger de venta (entregadas - rendidas - devueltas) totalmente separado del cupo de open
   const totalE=S.ferias.filter(f=>f.vendedoraId===vendedoraId).reduce((a,f)=>a+(f.units||0),0);
   const totalR=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.units||0),0);
   const totalDev=S.rendiciones.filter(r=>r.vendedoraId===vendedoraId).reduce((a,r)=>a+(r.devueltas||0),0);
-  const totalOpen=S.opens.filter(o=>o.vendedoraId===vendedoraId).reduce((a,o)=>a+(o.units||0),0);
-  const disponibles=totalE-totalR-totalDev-totalOpen;
-  const total=units+devueltas+openUsadas;
-  if(total>disponibles){alert('Solo quedan '+disponibles+' botellas disponibles ('+totalOpen+' ya fueron open bottle). Vendidas + devueltas + open no pueden superar ese numero.');return;}
+  const disponibles=totalE-totalR-totalDev;
+  const total=units+devueltas;
+  if(total>disponibles){alert('Solo quedan '+disponibles+' botellas de venta disponibles. Vendidas + devueltas no pueden superar ese numero.');return;}
+  // cupo de open bottles (asignado - ya consumido), ledger independiente
+  const cupoDisp=cupoOpenDisponible(vendedoraId);
+  if(openUsadas>cupoDisp){alert('Solo quedan '+cupoDisp+' botellas de cupo open disponibles para esta vendedora.');return;}
   if(units||devueltas){
     await addDoc(collection(db,'rendiciones'),{
       feriaId, feriaName:feria.nombre,
@@ -1185,7 +1220,7 @@ function renderStock(){
 function renderOpenList(){
   const el=document.getElementById('open-list');
   if(!S.opens.length){el.innerHTML='<div class="empty">Sin registros</div>';return;}
-  el.innerHTML=S.opens.map(o=>`<div class="row"><div class="ri"><div class="rn">${o.cliente} - ${o.units} bot.</div><div class="rs">${fmtF(o.fecha)} - ${o.motivo}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="rv oc">-${o.units}</div><button onclick="eliminarOpen('${o.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');
+  el.innerHTML=S.opens.map(o=>`<div class="row"><div class="ri"><div class="rn">${o.cliente} - ${o.units} bot.</div><div class="rs">${fmtF(o.fecha)} - ${o.vendedoraId?(o.feriaId?'Consumo de cupo - ':'Cupo asignado - '):''}${o.motivo}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="rv oc">-${o.units}</div><button onclick="eliminarOpen('${o.id}')" style="background:none;border:none;color:#b84040;cursor:pointer;padding:4px;flex-shrink:0"><i class="ti ti-trash" style="font-size:16px"></i></button></div></div>`).join('');
 }
 
 function renderVentas(){
@@ -1317,7 +1352,6 @@ function renderAlertas(){
   const feriaGrupos={};
   S.ferias.forEach(f=>{if(!feriaGrupos[f.vendedoraId])feriaGrupos[f.vendedoraId]={nombre:f.vendedoraNombre,total:0};feriaGrupos[f.vendedoraId].total+=f.units;});
   S.rendiciones.forEach(r=>{if(feriaGrupos[r.vendedoraId])feriaGrupos[r.vendedoraId].total-=((r.units||0)+(r.devueltas||0));});
-  S.opens.forEach(o=>{if(o.vendedoraId&&feriaGrupos[o.vendedoraId])feriaGrupos[o.vendedoraId].total-=(o.units||0);});
   const feriaDeuda=Object.values(feriaGrupos).filter(g=>g.total>0);
   let html='';
   nuevos.forEach(p=>{html+=`<div class="alert-box ar" style="margin-bottom:8px;animation:pulse 1.8s infinite"><i class="ti ti-shopping-cart" style="color:#b84040"></i><div><div class="at">${p.nombre} - ${p.units} bot.</div><div class="asb">${p.dir||''} - ${fmtF(p.fecha)}</div></div></div>`;});
