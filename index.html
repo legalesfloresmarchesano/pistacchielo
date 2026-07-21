@@ -717,6 +717,7 @@ function actualizarDispRendicion() {
   document.getElementById('r-disp-open').textContent=cupoAsig>0?('| Open disponible: '+cupoDisp+' (de '+cupoAsig+' asignadas)'):'';
   lbl.style.display='block';
 }
+window.actualizarDispRendicion = actualizarDispRendicion;
 
 function actualizarSelectorFeriaRendicion() {
   const vendedoraId=document.getElementById('r-vendedora')?.value||'';
@@ -732,6 +733,7 @@ function actualizarSelectorFeriaRendicion() {
   });
   actualizarDispRendicion();
 }
+window.actualizarSelectorFeriaRendicion = actualizarSelectorFeriaRendicion;
 
 window.addEntregaFeria = async () => {
   const vendedoraId=document.getElementById('f-vendedora').value;
