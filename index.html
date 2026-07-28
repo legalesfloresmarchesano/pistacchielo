@@ -289,7 +289,7 @@ src="https://www.facebook.com/tr?id=1433390961931398&ev=PageView&noscript=1"
         <select id="r-feria-sel" onchange="actualizarDispRendicion()"><option value="">Selecciona la feria</option></select>
         <div id="r-disp-lbl" style="display:none;font-size:12px;color:var(--muted);margin:4px 0 10px">Disponibles: <strong class="gc" id="r-disp-val">-</strong> botellas <span id="r-disp-open" style="color:var(--muted)"></span></div>
         <div class="form-grid">
-          <div><label>Botellas vendidas (rinden $30.000 c/u)</label><input type="number" id="r-units" placeholder="0" min="0" oninput="calcRendicion()"></div>
+          <div><label>Botellas vendidas (rinden $32.450 c/u)</label><input type="number" id="r-units" placeholder="0" min="0" oninput="calcRendicion()"></div>
           <div><label>Botellas devueltas (vuelven al stock)</label><input type="number" id="r-devueltas" placeholder="0" min="0" oninput="calcRendicion()"></div>
         </div>
         <label>Botellas open utilizadas (degustacion/regalo, se descuentan del saldo)</label>
@@ -440,12 +440,12 @@ src="https://www.facebook.com/tr?id=1433390961931398&ev=PageView&noscript=1"
         <label>Cantidad de botellas</label><input type="number" id="vc-units" placeholder="0" min="1" oninput="calcComision()">
         <label>Precio de venta</label>
         <div class="precio-opt">
-          <input type="radio" name="vprecio" id="vp0" value="45000" onchange="calcComision()">
-          <label for="vp0">$45.000<br><span style="font-size:10px;font-weight:400">Unitario</span></label>
-          <input type="radio" name="vprecio" id="vp1" value="34500" onchange="calcComision()">
-          <label for="vp1">$34.500<br><span style="font-size:10px;font-weight:400">1 caja</span></label>
-          <input type="radio" name="vprecio" id="vp2" value="29500" onchange="calcComision()">
-          <label for="vp2">$29.500<br><span style="font-size:10px;font-weight:400">4+ cajas</span></label>
+          <input type="radio" name="vprecio" id="vp0" value="49000" onchange="calcComision()">
+          <label for="vp0">$49.000<br><span style="font-size:10px;font-weight:400">Unitario</span></label>
+          <input type="radio" name="vprecio" id="vp1" value="37950" onchange="calcComision()">
+          <label for="vp1">$37.950<br><span style="font-size:10px;font-weight:400">1 caja</span></label>
+          <input type="radio" name="vprecio" id="vp2" value="32450" onchange="calcComision()">
+          <label for="vp2">$32.450<br><span style="font-size:10px;font-weight:400">4+ cajas</span></label>
         </div>
         <label>Forma de pago del cliente</label>
         <div class="precio-opt">
@@ -513,7 +513,7 @@ const today = () => new Date().toISOString().split('T')[0];
 const fmtF = f => { if(!f) return '-'; const d=new Date(f+'T00:00:00'); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'short'}); };
 const mesKey = f => { const d=new Date(f+'T00:00:00'); return MESES[d.getMonth()]+' '+d.getFullYear(); };
 const isThisMonth = f => { const d=new Date(f+'T00:00:00'),n=new Date(); return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear(); };
-const PRECIO_FERIA = 30000;
+const PRECIO_FERIA = 32450;
 
 let S = { stockInicial:0, pedidos:[], ventas:[], gastos:[], movs:[], opens:[], vendedores:[], comisiones:[], ferias:[], rendiciones:[], currentUser:null, userRole:null, currentVendedor:null, vendPedidos:[], vendComisiones:[], vendFerias:[], vendRendiciones:[] };
 let unsubs = [];
@@ -1098,7 +1098,7 @@ window.calcComision = () => {
   const precioUnitCobrar=metodo==='transferencia'?Math.round(precioBase*1.105):precioBase;
   const totalCobrar=units*precioUnitCobrar;
   const totalBase=units*precioBase;
-  const pct=precioBase===29500?10:precioBase===45000?23.33:15;
+  const pct=precioBase===32450?10:precioBase===49000?23.33:15;
   const comision=totalBase*pct/100;
   document.getElementById('cp-preciounit').textContent=fmt(precioUnitCobrar);
   document.getElementById('cp-total').textContent=fmt(totalCobrar);
@@ -1122,7 +1122,7 @@ window.vendedorAddPedido = async () => {
   const precioUnit=metodoPago==='transferencia'?Math.round(precioBase*1.105):precioBase;
   const total=units*precioUnit;
   const totalBase=units*precioBase;
-  const pct=precioBase===29500?10:precioBase===45000?23.33:15;
+  const pct=precioBase===32450?10:precioBase===49000?23.33:15;
   const comisionMonto=totalBase*pct/100;
   const pedidoRef=await addDoc(collection(db,'pedidos'),{nombre,cuit,tel,dir,units,precioUnit,precioBase,metodoPago,monto:total,fecha,notas,estado:'nuevo',vendedorId:S.currentUser.uid,vendedorNombre:S.currentVendedor.nombre,hora:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),creadoEn:serverTimestamp()});
   await addDoc(collection(db,'comisiones'),{pedidoId:pedidoRef.id,vendedorId:S.currentUser.uid,vendedorNombre:S.currentVendedor.nombre,clienteNombre:nombre,units,precioUnit:precioBase,totalVenta:totalBase,pct,monto:comisionMonto,fecha,pagada:false,creadoEn:serverTimestamp()});
