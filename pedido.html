@@ -335,11 +335,21 @@ window.adj = n => {
 
 function renderPrecio(){
   const p = getPrecio(cant);
-  const total = cant * p.pcu;
   const nc = ['','n1','n2','n3'][p.nivel];
   const tc = ['','t1','t2','t3'][p.nivel];
-  const vc = p.nivel===3 ? 'color:#f2ead8' : p.nivel===2 ? 'color:#5c6a28' : 'color:#1c1a14';
-  const sc = p.nivel===3 ? 'color:#888' : 'color:#7a7060';
+
+  if(p.nivel===3){
+    document.getElementById('precio-display').innerHTML = `
+      <div class="precio-box ${nc}">
+        <span class="precio-tag ${tc}">${p.label}</span>
+        <div style="font-size:18px;font-weight:700;color:#f2ead8;line-height:1.4">COMPRA MAYORISTA<br>CONSULTAR AL CEL 1168005101</div>
+      </div>`;
+    return;
+  }
+
+  const total = cant * p.pcu;
+  const vc = p.nivel===2 ? 'color:#5c6a28' : 'color:#1c1a14';
+  const sc = p.nivel===2 ? 'color:#888' : 'color:#7a7060';
   document.getElementById('precio-display').innerHTML = `
     <div class="precio-box ${nc}">
       <span class="precio-tag ${tc}">${p.label}${p.desc?' · '+p.desc:''}</span>
